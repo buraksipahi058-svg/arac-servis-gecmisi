@@ -1,19 +1,11 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { logout } from "@/app/(auth)/actions";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth";
 
 export default async function DashboardLayout({ children }: LayoutProps<"/dashboard">) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   // Proxy zaten yönlendiriyor; burada ikinci kez kontrol edilir (tek katmana güvenilmez).
-  if (!user) {
-    redirect("/login?next=/dashboard");
-  }
+  const { user } = await requireUser();
 
   return (
     <div className="min-h-dvh">

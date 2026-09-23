@@ -28,4 +28,14 @@ npm run dev               # http://192.168.1.13:3001
 npm run lint
 npm run typecheck
 npm run build
+npm run db:test           # veritabanı RLS testleri (pgTAP)
+```
+
+## Veritabanı
+
+Şema değişiklikleri `supabase/migrations/` altında tutulur.
+
+```bash
+npx supabase migration up   # bekleyen migration'ları uygular
+npm run db:types            # src/lib/supabase/database.types.ts dosyasını yeniden üretir
 ```
