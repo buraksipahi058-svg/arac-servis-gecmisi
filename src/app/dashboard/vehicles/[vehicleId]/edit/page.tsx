@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { DeleteVehicleButton } from "@/components/vehicles/delete-vehicle-button";
+import { ConfirmActionButton } from "@/components/ui/confirm-action-button";
 import { VehicleForm } from "@/components/vehicles/vehicle-form";
+import { countAllVehicleRecords } from "@/lib/records/queries";
 import { formatPlate } from "@/lib/vehicles/plate";
 import { getOwnVehicle } from "@/lib/vehicles/queries";
-import { updateVehicle } from "../../actions";
+import { deleteVehicle, updateVehicle } from "../../actions";
 
 export const metadata: Metadata = { title: "Aracı düzenle" };
 
@@ -17,6 +18,7 @@ export default async function EditVehiclePage({
   if (!vehicle) notFound();
 
   const plateLabel = formatPlate(vehicle.plate);
+  const recordCount = await countAllVehicleRecords(vehicle.id);
 
   return (
     <div className="mx-auto max-w-sm">
@@ -38,7 +40,18 @@ export default async function EditVehiclePage({
       />
 
       <div className="mt-10 border-t border-gray-200 pt-6">
-        <DeleteVehicleButton vehicleId={vehicle.id} plateLabel={plateLabel} />
+        {recordCount > 0 ? (
+          <p className="text-sm text-gray-500">
+            Servis kaydı olan araç silinemez.
+          </p>
+        ) : (
+          <ConfirmActionButton
+            action={deleteVehicle.bind(null, vehicle.id)}
+            confirmMessage={`${plateLabel} plakalı araç silinsin mi? Bu işlem geri alınamaz.`}
+            label="Aracı sil"
+            pendingText="Siliniyor…"
+          />
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { RecordListItem } from "@/components/records/record-list-item";
 import { buttonStyles } from "@/components/ui/button-styles";
+import { listVehicleRecords } from "@/lib/records/queries";
 import { formatPlate } from "@/lib/vehicles/plate";
 import { getOwnVehicle } from "@/lib/vehicles/queries";
 
@@ -19,6 +21,8 @@ export default async function VehiclePage({
   const { vehicleId } = await params;
   const vehicle = await getOwnVehicle(vehicleId);
   if (!vehicle) notFound();
+
+  const records = await listVehicleRecords(vehicle.id);
 
   return (
     <>
@@ -44,10 +48,29 @@ export default async function VehiclePage({
       </section>
 
       <section className="mt-6">
-        <h2 className="text-lg font-semibold">Servis Geçmişi</h2>
-        <div className="mt-3 rounded-xl border border-dashed border-gray-300 bg-white px-4 py-8 text-center">
-          <p className="text-gray-600">Henüz servis kaydı yok.</p>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">Servis Geçmişi</h2>
+          <Link
+            href={`/dashboard/vehicles/${vehicle.id}/records/new`}
+            className={`${buttonStyles.primary} h-10 text-sm`}
+          >
+            + Servis Kaydı
+          </Link>
         </div>
+
+        {records.length === 0 ? (
+          <div className="mt-3 rounded-xl border border-dashed border-gray-300 bg-white px-4 py-8 text-center">
+            <p className="text-gray-600">Henüz servis kaydı yok.</p>
+          </div>
+        ) : (
+          <ul className="mt-3 flex flex-col gap-3">
+            {records.map((record) => (
+              <li key={record.id}>
+                <RecordListItem record={record} />
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </>
   );

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { PostgrestError } from "@supabase/supabase-js";
+import type { ActionState } from "@/lib/action-state";
 import { requireUser } from "@/lib/auth";
 import { isUuid } from "@/lib/uuid";
 import {
@@ -74,15 +75,22 @@ export async function updateVehicle(
   redirect(`/dashboard/vehicles/${vehicleId}`);
 }
 
-export async function deleteVehicle(vehicleId: string): Promise<void> {
-  if (!isUuid(vehicleId)) redirect("/dashboard");
+export async function deleteVehicle(
+  vehicleId: string,
+  _prevState: ActionState,
+): Promise<ActionState> {
+  if (!isUuid(vehicleId)) return { error: NOT_FOUND_MESSAGE };
 
   const { supabase } = await requireUser();
   const { error } = await supabase.from("vehicles").delete().eq("id", vehicleId);
 
   if (error) {
+    // FK (on delete restrict): servis kaydı olan araç silinemez.
+    if (error.code === "23503") {
+      return { error: "Servis kaydı olan araç silinemez." };
+    }
     console.error("Araç silinemedi:", error);
-    throw new Error("Araç silinemedi.");
+    return { error: "Araç silinemedi. Lütfen tekrar dene." };
   }
 
   revalidatePath("/dashboard");
