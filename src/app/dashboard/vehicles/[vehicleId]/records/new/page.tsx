@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RecordForm } from "@/components/records/record-form";
+import { requireUser } from "@/lib/auth";
 import { todayIsoDate } from "@/lib/format";
 import { formatPlate } from "@/lib/vehicles/plate";
 import { getOwnVehicle } from "@/lib/vehicles/queries";
@@ -13,7 +14,7 @@ export default async function NewRecordPage({
   params,
 }: PageProps<"/dashboard/vehicles/[vehicleId]/records/new">) {
   const { vehicleId } = await params;
-  const vehicle = await getOwnVehicle(vehicleId);
+  const [{ user }, vehicle] = await Promise.all([requireUser(), getOwnVehicle(vehicleId)]);
   if (!vehicle) notFound();
 
   const today = todayIsoDate();
@@ -30,6 +31,7 @@ export default async function NewRecordPage({
         maxDate={today}
         submitLabel="Kaydet"
         pendingText="Kaydediliyor…"
+        documentUpload={{ userId: user.id, vehicleId: vehicle.id }}
       />
     </div>
   );

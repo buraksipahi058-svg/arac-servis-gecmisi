@@ -1,16 +1,21 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { RecordFormState } from "@/app/dashboard/vehicles/[vehicleId]/records/actions";
+import { DocumentPicker } from "@/components/documents/document-picker";
 import { FormAlert } from "@/components/ui/form-alert";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { TextAreaField } from "@/components/ui/text-area-field";
 import { TextField } from "@/components/ui/text-field";
+import { MAX_DOCUMENTS_PER_RECORD } from "@/lib/documents/constants";
+import { uploadRecordDocuments } from "@/lib/documents/upload";
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_SERVICE_NAME_LENGTH,
   type RecordFormValues,
 } from "@/lib/records/validation";
+import { createClient } from "@/lib/supabase/client";
 
 type RecordFormProps = {
   action: (state: RecordFormState, formData: FormData) => Promise<RecordFormState>;
@@ -18,6 +23,8 @@ type RecordFormProps = {
   maxDate: string;
   submitLabel: string;
   pendingText: string;
+  // Verilirse (yeni kayıt) formda belge/fotoğraf seçilebilir.
+  documentUpload?: { userId: string; vehicleId: string };
 };
 
 export function RecordForm({
@@ -26,10 +33,28 @@ export function RecordForm({
   maxDate,
   submitLabel,
   pendingText,
+  documentUpload,
 }: RecordFormProps) {
+  const router = useRouter();
   const [state, formAction] = useActionState(action, { values: initialValues });
+  const [files, setFiles] = useState<File[]>([]);
+  const uploadStartedFor = useRef<string | null>(null);
   const values = state.values ?? initialValues;
   const errors = state.errors ?? {};
+  // Kayıt oluştu, belgeler yükleniyor.
+  const uploading = Boolean(state.createdRecordId);
+
+  useEffect(() => {
+    const recordId = state.createdRecordId;
+    if (!recordId || !documentUpload || uploadStartedFor.current === recordId) return;
+    uploadStartedFor.current = recordId;
+
+    const target = { ...documentUpload, recordId };
+    void uploadRecordDocuments(createClient(), target, files).then(({ failed }) => {
+      const query = failed.length > 0 ? `?yuklenemeyen=${failed.length}` : "";
+      router.push(`/dashboard/vehicles/${target.vehicleId}/records/${recordId}${query}`);
+    });
+  }, [state.createdRecordId, documentUpload, files, router]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
@@ -75,8 +100,20 @@ export function RecordForm({
         error={errors.description}
       />
 
-      <SubmitButton pendingText={pendingText} className="mt-2 w-full">
-        {submitLabel}
+      {documentUpload && (
+        <>
+          <input type="hidden" name="hasDocuments" value={files.length > 0 ? "1" : "0"} />
+          <DocumentPicker
+            files={files}
+            onChange={setFiles}
+            maxFiles={MAX_DOCUMENTS_PER_RECORD}
+            disabled={uploading}
+          />
+        </>
+      )}
+
+      <SubmitButton pendingText={pendingText} disabled={uploading} className="mt-2 w-full">
+        {uploading ? "Belgeler yükleniyor…" : submitLabel}
       </SubmitButton>
     </form>
   );

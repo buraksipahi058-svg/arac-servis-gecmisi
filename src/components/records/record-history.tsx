@@ -23,6 +23,12 @@ function formatFieldValue(field: string, value: Json | undefined): string {
 function describeAudit(audit: RecordAudit): { title: string; changes: string[] } {
   if (audit.action === "insert") return { title: "Kayıt oluşturuldu", changes: [] };
   if (audit.action === "soft_delete") return { title: "Kayıt silindi", changes: [] };
+  if (audit.action === "document_added" || audit.action === "document_removed") {
+    const values = asObject(audit.action === "document_added" ? audit.new_values : audit.old_values);
+    const noun = values.type === "document" ? "Belge" : "Fotoğraf";
+    const verb = audit.action === "document_added" ? "eklendi" : "kaldırıldı";
+    return { title: `${noun} ${verb}`, changes: [String(values.file_name ?? "")] };
+  }
 
   const oldValues = asObject(audit.old_values);
   const newValues = asObject(audit.new_values);

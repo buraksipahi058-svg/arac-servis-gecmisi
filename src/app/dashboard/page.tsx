@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { buttonStyles } from "@/components/ui/button-styles";
+import { buttonClass } from "@/components/ui/button-styles";
 import { VehicleCard } from "@/components/vehicles/vehicle-card";
 import { listOwnVehicles } from "@/lib/vehicles/queries";
 
@@ -13,7 +13,7 @@ export default async function DashboardPage() {
     <>
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-semibold">Benim Araçlarım</h1>
-        <Link href="/dashboard/vehicles/new" className={`${buttonStyles.primary} h-10 text-sm`}>
+        <Link href="/dashboard/vehicles/new" className={buttonClass("primary", "sm")}>
           + Araç Ekle
         </Link>
       </div>

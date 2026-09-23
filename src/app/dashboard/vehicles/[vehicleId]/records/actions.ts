@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import type { PostgrestError } from "@supabase/supabase-js";
 import type { ActionState } from "@/lib/action-state";
 import { requireUser } from "@/lib/auth";
+import { DOCUMENTS_BUCKET } from "@/lib/documents/constants";
 import {
   parseRecordForm,
   type RecordFieldErrors,
@@ -16,9 +17,12 @@ export type RecordFormState = {
   values?: RecordFormValues;
   errors?: RecordFieldErrors;
   formError?: string;
+  // Belge seçildiyse kayıt oluşturulur, yönlendirme yerine ID döner; istemci belgeleri yükler.
+  createdRecordId?: string;
 };
 
 const RECORD_NOT_FOUND = "Kayıt bulunamadı veya düzenlenemez.";
+const DOCUMENT_NOT_FOUND = "Belge bulunamadı veya kaldırılamaz.";
 
 function vehiclePath(vehicleId: string) {
   return `/dashboard/vehicles/${vehicleId}`;
@@ -42,6 +46,7 @@ export async function createRecord(
   const { values, errors, data } = parseRecordForm(formData);
   if (!data) return { values, errors };
   if (!isUuid(vehicleId)) return { values, formError: "Araç bulunamadı." };
+  const hasDocuments = formData.get("hasDocuments") === "1";
 
   const { supabase } = await requireUser(`${vehiclePath(vehicleId)}/records/new`);
   // entered_by DB'de 'owner' olarak atanır; istemci değiştiremez.
@@ -58,6 +63,7 @@ export async function createRecord(
   }
 
   revalidateVehicle(vehicleId);
+  if (hasDocuments) return { values, createdRecordId: record.id };
   redirect(`${vehiclePath(vehicleId)}/records/${record.id}`);
 }
 
@@ -114,4 +120,48 @@ export async function deleteRecord(
 
   revalidateVehicle(vehicleId);
   redirect(vehiclePath(vehicleId));
+}
+
+// Önce dosya depodan kaldırılır (kişisel veri içerebilir), sonra kayıt silinir.
+// Satır silme başarısız olursa işlem tekrar denenebilir; eksik dosyayı kaldırmak hata vermez.
+export async function deleteDocument(
+  vehicleId: string,
+  recordId: string,
+  documentId: string,
+  _prevState: ActionState,
+): Promise<ActionState> {
+  if (![vehicleId, recordId, documentId].every(isUuid)) return { error: DOCUMENT_NOT_FOUND };
+
+  const { supabase } = await requireUser();
+  const { data: document, error } = await supabase
+    .from("record_documents")
+    .select("id, storage_path")
+    .eq("id", documentId)
+    .eq("record_id", recordId)
+    .maybeSingle();
+
+  if (error) return { error: logAndGenericError("Belge okunamadı:", error) };
+  if (!document) return { error: DOCUMENT_NOT_FOUND };
+
+  const { error: removeError } = await supabase.storage
+    .from(DOCUMENTS_BUCKET)
+    .remove([document.storage_path]);
+  if (removeError) {
+    console.error("Belge dosyası kaldırılamadı:", removeError);
+    return { error: DOCUMENT_NOT_FOUND };
+  }
+
+  const { data: deleted, error: deleteError } = await supabase
+    .from("record_documents")
+    .delete()
+    .eq("id", document.id)
+    .select("id")
+    .maybeSingle();
+
+  if (deleteError) return { error: logAndGenericError("Belge kaydı silinemedi:", deleteError) };
+  if (!deleted) return { error: DOCUMENT_NOT_FOUND };
+
+  revalidateVehicle(vehicleId);
+  revalidatePath(`${vehiclePath(vehicleId)}/records/${recordId}`);
+  return {};
 }

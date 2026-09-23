@@ -34,6 +34,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      record_documents: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_size: number
+          id: string
+          mime_type: string
+          record_id: string
+          storage_path: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_size: number
+          id?: string
+          mime_type: string
+          record_id: string
+          storage_path: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          mime_type?: string
+          record_id?: string
+          storage_path?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "record_documents_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "service_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_record_audits: {
         Row: {
           action: string

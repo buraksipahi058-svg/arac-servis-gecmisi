@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RecordListItem } from "@/components/records/record-list-item";
-import { buttonStyles } from "@/components/ui/button-styles";
+import { buttonClass } from "@/components/ui/button-styles";
 import { listVehicleRecords } from "@/lib/records/queries";
 import { formatPlate } from "@/lib/vehicles/plate";
 import { getOwnVehicle } from "@/lib/vehicles/queries";
@@ -40,7 +40,7 @@ export default async function VehiclePage({
           </div>
           <Link
             href={`/dashboard/vehicles/${vehicle.id}/edit`}
-            className={`${buttonStyles.secondary} h-9 shrink-0 px-3 text-sm`}
+            className={`${buttonClass("secondary", "sm")} shrink-0`}
           >
             Düzenle
           </Link>
@@ -52,7 +52,7 @@ export default async function VehiclePage({
           <h2 className="text-lg font-semibold">Servis Geçmişi</h2>
           <Link
             href={`/dashboard/vehicles/${vehicle.id}/records/new`}
-            className={`${buttonStyles.primary} h-10 text-sm`}
+            className={`${buttonClass("primary", "sm")} shrink-0`}
           >
             + Servis Kaydı
           </Link>

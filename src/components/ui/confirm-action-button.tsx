@@ -10,6 +10,7 @@ type ConfirmActionButtonProps = {
   confirmMessage: string;
   label: string;
   pendingText: string;
+  compact?: boolean;
 };
 
 // Geri alınamaz işlemler (silme) için onay isteyen, hata mesajını gösteren form butonu.
@@ -18,6 +19,7 @@ export function ConfirmActionButton({
   confirmMessage,
   label,
   pendingText,
+  compact = false,
 }: ConfirmActionButtonProps) {
   const [state, formAction] = useActionState(action, {});
 
@@ -31,9 +33,10 @@ export function ConfirmActionButton({
     <form action={formAction} onSubmit={confirmSubmit} className="flex flex-col gap-3">
       {state.error && <FormAlert tone="error">{state.error}</FormAlert>}
       <SubmitButton
-        variant="secondary"
+        variant="danger"
+        size={compact ? "sm" : "md"}
         pendingText={pendingText}
-        className="w-full border-red-300 text-red-700 hover:bg-red-50"
+        className={compact ? "" : "w-full"}
       >
         {label}
       </SubmitButton>

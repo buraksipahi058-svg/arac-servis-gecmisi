@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { buttonStyles } from "@/components/ui/button-styles";
+import { buttonClass } from "@/components/ui/button-styles";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function HomePage() {
@@ -19,15 +19,15 @@ export default async function HomePage() {
 
       <div className="flex flex-col gap-3">
         {user ? (
-          <Link href="/dashboard" className={buttonStyles.primary}>
+          <Link href="/dashboard" className={buttonClass("primary")}>
             Araçlarıma git
           </Link>
         ) : (
           <>
-            <Link href="/signup" className={buttonStyles.primary}>
+            <Link href="/signup" className={buttonClass("primary")}>
               Kayıt ol
             </Link>
-            <Link href="/login" className={buttonStyles.secondary}>
+            <Link href="/login" className={buttonClass("secondary")}>
               Giriş yap
             </Link>
           </>

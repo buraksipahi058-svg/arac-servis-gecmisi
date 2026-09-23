@@ -33,6 +33,13 @@ export function formatKm(km: number): string {
   return `${numberFormatter.format(km)} km`;
 }
 
+// 523000 → "511 KB", 2400000 → "2,3 MB"
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toLocaleString("tr-TR", { maximumFractionDigits: 1 })} MB`;
+}
+
 // Türkiye saatine göre bugünün tarihi: "2026-09-24"
 export function todayIsoDate(): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: APP_TIME_ZONE }).format(new Date());

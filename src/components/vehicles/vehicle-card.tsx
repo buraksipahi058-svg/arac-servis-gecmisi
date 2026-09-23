@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { buttonStyles } from "@/components/ui/button-styles";
+import { buttonClass } from "@/components/ui/button-styles";
 import { formatPlate } from "@/lib/vehicles/plate";
 import type { VehicleSummary } from "@/lib/vehicles/queries";
 
@@ -12,7 +12,7 @@ export function VehicleCard({ vehicle }: { vehicle: VehicleSummary }) {
       </p>
       <Link
         href={`/dashboard/vehicles/${vehicle.id}`}
-        className={`${buttonStyles.secondary} mt-4 h-10 w-full text-sm`}
+        className={`${buttonClass("secondary", "sm")} mt-4 w-full`}
       >
         Geçmişi Gör
       </Link>

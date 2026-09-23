@@ -21,8 +21,8 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
             <form action={logout}>
               <SubmitButton
                 variant="secondary"
+                size="sm"
                 pendingText="Çıkılıyor…"
-                className="h-9 px-3 text-sm"
               >
                 Çıkış yap
               </SubmitButton>
