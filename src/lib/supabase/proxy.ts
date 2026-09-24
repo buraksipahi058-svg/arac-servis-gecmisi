@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import type { User } from "@supabase/supabase-js";
 import { getSupabasePublicEnv } from "./env";
+import { fetchWithTimeout } from "./fetch-with-timeout";
 
 // Her istekte oturumu doğrular, gerekirse token'ı yeniler ve
 // güncel cookie'leri hem isteğe hem yanıta yazar.
@@ -12,6 +13,7 @@ export async function updateSession(
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(url, publishableKey, {
+    global: { fetch: fetchWithTimeout },
     cookies: {
       getAll() {
         return request.cookies.getAll();

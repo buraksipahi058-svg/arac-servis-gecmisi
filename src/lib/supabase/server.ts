@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import type { Database } from "./database.types";
 import { getSupabasePublicEnv } from "./env";
+import { fetchWithTimeout } from "./fetch-with-timeout";
 
 // Server Component, Server Action ve Route Handler'lar için Supabase client'ı.
 // Oturum cookie'den okunur; kullanıcı yetkisiyle çalışır (RLS geçerli).
@@ -11,6 +12,7 @@ export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(url, publishableKey, {
+    global: { fetch: fetchWithTimeout },
     cookies: {
       getAll() {
         return cookieStore.getAll();

@@ -42,6 +42,7 @@ export function AddDocuments({ target, remainingSlots }: AddDocumentsProps) {
         onChange={setFiles}
         maxFiles={remainingSlots}
         disabled={busy}
+        label="Belge veya fotoğraf ekle"
       />
       {files.length > 0 && (
         <button

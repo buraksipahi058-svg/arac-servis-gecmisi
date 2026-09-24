@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import type { ActionState } from "@/lib/action-state";
 import { encodeAccessCookie, SHARE_ACCESS_COOKIE, verifyShareAccess } from "@/lib/share/access";
 import { createFailureLimiter, getClientKey } from "@/lib/rate-limit";
+import { isHttpsRequest } from "@/lib/request-origin";
 
 const SHARED_PATH = "/shared";
 // Hatalı plaka/kod denemesi: istemci başına 15 dakikada 10.
@@ -35,7 +36,8 @@ export async function openSharedHistory(
     httpOnly: true,
     sameSite: "lax",
     path: SHARED_PATH,
-    secure: process.env.NODE_ENV === "production",
+    // HTTPS'te güvenli çerez; yerel ağda düz HTTP ile de çalışır.
+    secure: await isHttpsRequest(),
     maxAge: Math.max(secondsLeft, 0),
   });
   redirect(SHARED_PATH);

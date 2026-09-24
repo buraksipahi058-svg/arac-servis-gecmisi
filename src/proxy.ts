@@ -38,7 +38,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Statik dosyalar ve görseller hariç tüm yollar.
-    "/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    // Statik dosyalar, uygulama ikonları, manifest ve görseller hariç tüm yollar.
+    "/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|manifest.webmanifest|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

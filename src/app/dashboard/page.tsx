@@ -19,8 +19,16 @@ export default async function DashboardPage() {
       </div>
 
       {vehicles.length === 0 ? (
-        <div className="mt-6 rounded-xl border border-dashed border-gray-300 bg-white px-4 py-10 text-center">
-          <p className="text-gray-600">Henüz araç eklenmemiş.</p>
+        <div className="mt-6 flex flex-col items-center gap-4 rounded-xl border border-dashed border-gray-300 bg-white px-4 py-10 text-center">
+          <div>
+            <p className="font-medium text-gray-800">Henüz araç eklenmemiş.</p>
+            <p className="mt-1 text-sm text-gray-600">
+              Aracını ekle, servis kayıtlarını ve belgelerini tek yerde tut.
+            </p>
+          </div>
+          <Link href="/dashboard/vehicles/new" className={buttonClass("primary")}>
+            İlk aracını ekle
+          </Link>
         </div>
       ) : (
         <ul className="mt-6 grid gap-3 sm:grid-cols-2">

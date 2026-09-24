@@ -7,6 +7,9 @@ export const metadata: Metadata = {
     template: "%s · Araç Servis Geçmişi",
   },
   description: "Aracının bakım, onarım ve parça değişimi kayıtlarını tek yerde tut.",
+  applicationName: "Araç Servis Geçmişi",
+  // iOS'ta "Ana Ekrana Ekle" ile açıldığında başlık ve durum çubuğu.
+  appleWebApp: { capable: true, title: "Servis Geçmişi", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

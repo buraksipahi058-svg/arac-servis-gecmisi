@@ -10,11 +10,18 @@ type DocumentPickerProps = {
   onChange: (files: File[]) => void;
   maxFiles: number;
   disabled?: boolean;
+  label?: string;
 };
 
 // Belge/fotoğraf seçimi. Dosya input'unun "name"i yoktur: dosyalar form ile sunucuya
 // gönderilmez, tarayıcıdan doğrudan Storage'a yüklenir.
-export function DocumentPicker({ files, onChange, maxFiles, disabled = false }: DocumentPickerProps) {
+export function DocumentPicker({
+  files,
+  onChange,
+  maxFiles,
+  disabled = false,
+  label = "Belge / fotoğraf",
+}: DocumentPickerProps) {
   const [rejections, setRejections] = useState<string[]>([]);
   const remaining = maxFiles - files.length;
 
@@ -46,7 +53,7 @@ export function DocumentPicker({ files, onChange, maxFiles, disabled = false }: 
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium text-gray-800">Belge / fotoğraf</span>
+      <span className="text-sm font-medium text-gray-800">{label}</span>
 
       <label
         className={`flex h-12 items-center justify-center rounded-lg border border-dashed border-gray-400 bg-white px-4 text-base font-medium text-gray-800 ${

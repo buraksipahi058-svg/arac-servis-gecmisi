@@ -36,8 +36,9 @@
 
 ## Production öncesi yapılacaklar
 
-- [ ] HTTPS ve önünde `X-Forwarded-For` başlığını kendisi yazan güvenilir bir ters vekil (reverse proxy).
-      Deneme sınırları bu başlığa dayanır; vekil yoksa başlık istemci tarafından değiştirilebilir.
+- [ ] HTTPS ve önünde `X-Forwarded-For`/`X-Forwarded-Proto` başlıklarını kendisi yazan güvenilir bir ters vekil
+      (reverse proxy). Deneme sınırları `X-Forwarded-For`'a dayanır; vekil yoksa bu başlık istemci tarafından
+      değiştirilebilir. Paylaşım çerezi HTTPS isteklerinde `secure` olarak yazılır.
 - [ ] Supabase Auth: e-posta doğrulamasını aç (`enable_confirmations`), SMTP ayarla, `site_url` ve yönlendirme
       adreslerini production alan adına göre güncelle; doğrulama bağlantısı için `/auth/confirm` rotası ekle.
 - [ ] Deneme sınırları bellek içi: birden fazla sunucu süreci varsa ortak bir depoya (ör. Postgres/Redis) taşı.
