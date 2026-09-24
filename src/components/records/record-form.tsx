@@ -4,15 +4,18 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { RecordFormState } from "@/app/dashboard/vehicles/[vehicleId]/records/actions";
 import { DocumentPicker } from "@/components/documents/document-picker";
+import { OdometerInputWarning } from "@/components/records/odometer-warning";
 import { FormAlert } from "@/components/ui/form-alert";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { TextAreaField } from "@/components/ui/text-area-field";
 import { TextField } from "@/components/ui/text-field";
 import { MAX_DOCUMENTS_PER_RECORD } from "@/lib/documents/constants";
 import { uploadRecordDocuments } from "@/lib/documents/upload";
+import { checkOdometerValue, type OdometerPoint } from "@/lib/records/odometer";
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_SERVICE_NAME_LENGTH,
+  parseKm,
   type RecordFormValues,
 } from "@/lib/records/validation";
 import { createClient } from "@/lib/supabase/client";
@@ -23,9 +26,13 @@ type RecordFormProps = {
   maxDate: string;
   submitLabel: string;
   pendingText: string;
+  // Aracın diğer kayıtları: girilen km'yi kaydetmeden önce karşılaştırmak için.
+  odometerPoints: OdometerPoint[];
   // Verilirse (yeni kayıt) formda belge/fotoğraf seçilebilir.
   documentUpload?: { userId: string; vehicleId: string };
 };
+
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 export function RecordForm({
   action,
@@ -33,6 +40,7 @@ export function RecordForm({
   maxDate,
   submitLabel,
   pendingText,
+  odometerPoints,
   documentUpload,
 }: RecordFormProps) {
   const router = useRouter();
@@ -41,6 +49,13 @@ export function RecordForm({
   const uploadStartedFor = useRef<string | null>(null);
   const values = state.values ?? initialValues;
   const errors = state.errors ?? {};
+  const [serviceDate, setServiceDate] = useState(values.serviceDate);
+  const [odometerInput, setOdometerInput] = useState(values.odometerKm);
+  const odometerKm = parseKm(odometerInput);
+  const odometerCheck =
+    odometerKm !== null && ISO_DATE_PATTERN.test(serviceDate)
+      ? checkOdometerValue(odometerPoints, serviceDate, odometerKm)
+      : { lowerThanPrevious: null, higherThanNext: null };
   // Kayıt oluştu, belgeler yükleniyor.
   const uploading = Boolean(state.createdRecordId);
 
@@ -67,6 +82,7 @@ export function RecordForm({
         max={maxDate}
         required
         defaultValue={values.serviceDate}
+        onChange={(event) => setServiceDate(event.target.value)}
         error={errors.serviceDate}
       />
       <TextField
@@ -77,8 +93,10 @@ export function RecordForm({
         autoComplete="off"
         required
         defaultValue={values.odometerKm}
+        onChange={(event) => setOdometerInput(event.target.value)}
         error={errors.odometerKm}
       />
+      <OdometerInputWarning {...odometerCheck} />
       <TextField
         label="Servis"
         name="serviceName"

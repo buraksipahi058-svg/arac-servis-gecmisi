@@ -8,7 +8,16 @@ export function TimelineSummary({ summary }: { summary: Summary }) {
   return (
     <ul className="flex flex-col gap-1 rounded-xl bg-gray-100 px-4 py-3 text-sm text-gray-700">
       <li>{`${summary.recordCount} servis kaydı bulundu.`}</li>
-      <li>{`${summary.recordsWithAttachments} kayıtta belge veya fotoğraf bulunuyor.`}</li>
+      <li>
+        {summary.recordsWithAttachments === 0
+          ? "Hiçbir kayıtta belge veya fotoğraf bulunmuyor."
+          : `${summary.recordsWithAttachments} kayıtta belge veya fotoğraf bulunuyor.`}
+      </li>
+      {summary.odometerDropCount > 0 && (
+        <li className="font-medium text-amber-800">
+          {`${summary.odometerDropCount} kayıtta, bir önceki kayda göre kilometre düşüşü tespit edildi.`}
+        </li>
+      )}
       {summary.latestKm !== null && (
         <li>{`Son kayıt ${formatKm(summary.latestKm)}'de oluşturulmuş.`}</li>
       )}

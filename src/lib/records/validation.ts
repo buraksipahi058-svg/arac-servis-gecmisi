@@ -29,7 +29,7 @@ function isRealDate(isoDate: string): boolean {
 }
 
 // "58.700", "58 700" → 58700
-function parseKm(value: string): number | null {
+export function parseKm(value: string): number | null {
   const digits = value.replace(/[.\s]/g, "");
   if (!/^\d+$/.test(digits)) return null;
   return Number(digits);

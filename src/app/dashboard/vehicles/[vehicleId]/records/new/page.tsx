@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { RecordForm } from "@/components/records/record-form";
 import { requireUser } from "@/lib/auth";
 import { todayIsoDate } from "@/lib/format";
+import { listOdometerPoints } from "@/lib/records/queries";
 import { formatPlate } from "@/lib/vehicles/plate";
 import { getOwnVehicle } from "@/lib/vehicles/queries";
 import { createRecord } from "../actions";
@@ -16,6 +17,7 @@ export default async function NewRecordPage({
   const { vehicleId } = await params;
   const [{ user }, vehicle] = await Promise.all([requireUser(), getOwnVehicle(vehicleId)]);
   if (!vehicle) notFound();
+  const odometerPoints = await listOdometerPoints(vehicle.id);
 
   const today = todayIsoDate();
 
@@ -31,6 +33,7 @@ export default async function NewRecordPage({
         maxDate={today}
         submitLabel="Kaydet"
         pendingText="Kaydediliyor…"
+        odometerPoints={odometerPoints}
         documentUpload={{ userId: user.id, vehicleId: vehicle.id }}
       />
     </div>

@@ -2,7 +2,8 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/uuid";
-import { toAttachmentCounts, type TimelineEntry } from "./timeline";
+import type { OdometerPoint } from "./odometer";
+import { annotateOdometerDrops, toAttachmentCounts, type TimelineEntry } from "./timeline";
 
 const RECORD_COLUMNS =
   "id, vehicle_id, service_date, odometer_km, service_name, description, entered_by, created_at, updated_at";
@@ -12,22 +13,43 @@ export async function listVehicleTimeline(vehicleId: string): Promise<TimelineEn
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("service_records")
-    .select("id, service_date, odometer_km, service_name, description, record_documents(type)")
+    .select("id, service_date, created_at, odometer_km, service_name, description, record_documents(type)")
     .eq("vehicle_id", vehicleId)
     .is("deleted_at", null)
     .order("service_date", { ascending: false })
     .order("created_at", { ascending: false });
 
   if (error) throw error;
+  return annotateOdometerDrops(
+    data.map((record) => ({
+      id: record.id,
+      serviceDate: record.service_date,
+      createdAt: record.created_at,
+      odometerKm: record.odometer_km,
+      serviceName: record.service_name,
+      description: record.description,
+      ...toAttachmentCounts(record.record_documents),
+    })),
+  );
+}
+
+// Km kontrolü için aracın silinmemiş kayıtlarının tarih/km değerleri.
+export const listOdometerPoints = cache(async (vehicleId: string): Promise<OdometerPoint[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("service_records")
+    .select("id, service_date, created_at, odometer_km")
+    .eq("vehicle_id", vehicleId)
+    .is("deleted_at", null);
+
+  if (error) throw error;
   return data.map((record) => ({
     id: record.id,
     serviceDate: record.service_date,
+    createdAt: record.created_at,
     odometerKm: record.odometer_km,
-    serviceName: record.service_name,
-    description: record.description,
-    ...toAttachmentCounts(record.record_documents),
   }));
-}
+});
 
 export const getVehicleRecord = cache(async (vehicleId: string, recordId: string) => {
   if (!isUuid(vehicleId) || !isUuid(recordId)) return null;

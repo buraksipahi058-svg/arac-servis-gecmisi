@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddDocuments } from "@/components/documents/add-documents";
 import { DocumentList } from "@/components/documents/document-list";
+import { RecordOdometerWarning } from "@/components/records/odometer-warning";
 import { RecordHistory } from "@/components/records/record-history";
 import { buttonClass } from "@/components/ui/button-styles";
 import { ConfirmActionButton } from "@/components/ui/confirm-action-button";
@@ -12,7 +13,8 @@ import { MAX_DOCUMENTS_PER_RECORD } from "@/lib/documents/constants";
 import { listRecordDocuments } from "@/lib/documents/queries";
 import { formatDate, formatKm } from "@/lib/format";
 import { enteredByLabel } from "@/lib/records/entered-by";
-import { getVehicleRecord, listRecordAudits } from "@/lib/records/queries";
+import { findOdometerDrops } from "@/lib/records/odometer";
+import { getVehicleRecord, listOdometerPoints, listRecordAudits } from "@/lib/records/queries";
 import { formatPlate } from "@/lib/vehicles/plate";
 import { getOwnVehicle } from "@/lib/vehicles/queries";
 import { deleteDocument } from "../actions";
@@ -32,10 +34,12 @@ export default async function RecordPage({
   ]);
   if (!vehicle || !record) notFound();
 
-  const [documents, audits] = await Promise.all([
+  const [documents, audits, odometerPoints] = await Promise.all([
     listRecordDocuments(record.id),
     listRecordAudits(record.id),
+    listOdometerPoints(vehicle.id),
   ]);
+  const odometerDrop = findOdometerDrops(odometerPoints).get(record.id);
   const canEdit = record.entered_by === "owner";
   const remainingSlots = MAX_DOCUMENTS_PER_RECORD - documents.length;
   const failedUploadCount = Number(yuklenemeyen) || 0;
@@ -71,6 +75,12 @@ export default async function RecordPage({
             </Link>
           )}
         </div>
+
+        {odometerDrop && (
+          <div className="mt-4">
+            <RecordOdometerWarning odometerKm={record.odometer_km} previous={odometerDrop} />
+          </div>
+        )}
 
         <p className="mt-4 whitespace-pre-line break-words">{record.description}</p>
         <p className="mt-4 text-sm text-gray-500">{enteredByLabel(record.entered_by)}</p>

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { RecordForm } from "@/components/records/record-form";
 import { ConfirmActionButton } from "@/components/ui/confirm-action-button";
 import { todayIsoDate } from "@/lib/format";
-import { getVehicleRecord } from "@/lib/records/queries";
+import { getVehicleRecord, listOdometerPoints } from "@/lib/records/queries";
 import { deleteRecord, updateRecord } from "../../actions";
 
 export const metadata: Metadata = { title: "Servis kaydını düzenle" };
@@ -18,6 +18,10 @@ export default async function EditRecordPage({
   if (!record || record.entered_by !== "owner") notFound();
 
   const recordPath = `/dashboard/vehicles/${vehicleId}/records/${record.id}`;
+  // Düzenlenen kaydın kendisi karşılaştırmaya dahil edilmez.
+  const odometerPoints = (await listOdometerPoints(vehicleId)).filter(
+    (point) => point.id !== record.id,
+  );
 
   return (
     <div className="mx-auto max-w-sm">
@@ -40,6 +44,7 @@ export default async function EditRecordPage({
         maxDate={todayIsoDate()}
         submitLabel="Değişiklikleri kaydet"
         pendingText="Kaydediliyor…"
+        odometerPoints={odometerPoints}
       />
 
       <div className="mt-10 border-t border-gray-200 pt-6">

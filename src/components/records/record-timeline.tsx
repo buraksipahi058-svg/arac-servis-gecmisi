@@ -35,8 +35,13 @@ export function RecordTimeline({ years, getRecordHref }: RecordTimelineProps) {
                     </div>
                     <p className="mt-1 font-medium">{entry.serviceName}</p>
                     <p className="mt-0.5 line-clamp-2 text-gray-600">{entry.description}</p>
-                    {labels.length > 0 && (
+                    {(labels.length > 0 || entry.odometerDrop) && (
                       <p className="mt-2 flex flex-wrap gap-2">
+                        {entry.odometerDrop && (
+                          <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
+                            Kilometre tutarsızlığı
+                          </span>
+                        )}
                         {labels.map((label) => (
                           <span
                             key={label}
