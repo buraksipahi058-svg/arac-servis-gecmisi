@@ -1,0 +1,54 @@
+# Güvenlik modeli ve gözden geçirme (Adım 9)
+
+## Katmanlar
+
+1. **Veritabanı (asıl koruma):** Tüm `public` tablolarında RLS açık. `anon` rolünün hiçbir tablo yetkisi yok.
+   `authenticated` yalnızca gereken sütunlarda yetkili (sütun düzeyi GRANT); sahiplik alanları (`owner_id`),
+   `entered_by`, zaman damgaları, belge türü/boyutu ve paylaşım kodu süresi istemciden yazılamaz.
+   Paylaşım kodu hash'i istemciye okunamaz.
+2. **Storage:** `record-documents` bucket'ı private (10 MB, JPG/PNG/WEBP/PDF). Yol
+   `{owner_id}/{vehicle_id}/{record_id}/{uuid}.ext`; yükleme/silme yalnızca kendi aracının silinmemiş ve
+   kendi girdiği kaydına. Üzerine yazma yok. Belgeler kısa ömürlü signed URL ile gösterilir.
+3. **Sunucu (Next.js):** Oturum gerektiren her server action `requireUser` ile başlar; sayfalar proxy'ye ek
+   olarak oturumu kendileri de doğrular. URL/form'dan gelen ID'ler UUID olarak doğrulanır; RLS ikinci katmandır.
+4. **Paylaşım görünümü:** Plaka + kod sunucuda doğrulanır (hash, plaka, süre, iptal); tüm hatalarda aynı
+   mesaj. Service role client (`src/lib/supabase/admin.ts`, `server-only`) yalnızca burada ve yalnızca
+   whitelist alanlar için kullanılır. Erişim httpOnly çerezle, her istekte yeniden doğrulanır.
+
+## Otomatik kontroller
+
+- `npm run db:test` — pgTAP: RLS, yetkiler, trigger'lar, storage politikaları ve genel kurallar
+  (`security_hardening.test.sql`: tüm tablolarda RLS, `anon` yetkisi yok, istemci rolleri public
+  fonksiyonları çalıştıramaz, security definer fonksiyonlarda sabit `search_path`).
+- `npx supabase db advisors --local` — Supabase güvenlik/performans denetleyicisi.
+- `npm audit`
+
+## Adım 9'da düzeltilenler
+
+| Bulgu | Düzeltme |
+| --- | --- |
+| Girişteki `next` parametresi ile açık yönlendirme (`/%09/evil.com` → `evil.com`) | `safeNextPath`: URL ayrıştırma, kontrol karakteri reddi, yalnızca `/dashboard` altı |
+| Giriş formunda deneme sınırı yoktu | İstemci + e-posta başına 15 dk'da 10 hatalı deneme |
+| Güvenlik başlıkları yoktu, `X-Powered-By` açıktı | `X-Frame-Options`, `frame-ancestors`, `nosniff`, `Referrer-Policy`, `Permissions-Policy` |
+| Yeni tablo/fonksiyonlar varsayılan olarak `anon`/`authenticated`'a açılıyordu | `public` şeması varsayılan yetkileri kaldırıldı |
+| Deneme sayacı sınırsız bellek kullanabiliyordu | En fazla 10.000 istemci anahtarı |
+| `service_records.service_id` FK indeksi yoktu | İndeks eklendi |
+
+## Production öncesi yapılacaklar
+
+- [ ] HTTPS ve önünde `X-Forwarded-For` başlığını kendisi yazan güvenilir bir ters vekil (reverse proxy).
+      Deneme sınırları bu başlığa dayanır; vekil yoksa başlık istemci tarafından değiştirilebilir.
+- [ ] Supabase Auth: e-posta doğrulamasını aç (`enable_confirmations`), SMTP ayarla, `site_url` ve yönlendirme
+      adreslerini production alan adına göre güncelle; doğrulama bağlantısı için `/auth/confirm` rotası ekle.
+- [ ] Deneme sınırları bellek içi: birden fazla sunucu süreci varsa ortak bir depoya (ör. Postgres/Redis) taşı.
+- [ ] Yerel CLI'ın paylaşılan varsayılan anahtarları yerine production projesinin anahtarları;
+      `SUPABASE_SECRET_KEY` yalnızca sunucu ortam değişkeni olarak.
+- [ ] İsteğe bağlı: paylaşım kodu hash'ine sunucu tarafı gizli anahtar (HMAC); belgeleri sunucu üzerinden
+      aktarma (signed URL'lerde sahip/araç/kayıt UUID'leri görünür).
+
+## Geliştirme hostu (192.168.1.13) hakkında
+
+Supabase CLI yerel geliştirme içindir: tüm servisler `0.0.0.0`'a bağlanır. Veritabanı (54322) varsayılan
+`postgres/postgres` şifresiyle, Studio (54323) ve Mailpit (54324) şifresiz olarak yerel ağa açıktır.
+Yerel ağda güvenilmeyen cihaz varsa bu portlar yalnızca host ve geliştirici bilgisayarına açılmalıdır
+(Docker yayınlanan portlarda `ufw`'yi atladığı için kural `DOCKER-USER` zincirine yazılmalıdır).

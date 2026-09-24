@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createFailureLimiter, getClientKey } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/safe-redirect";
 
@@ -12,6 +13,9 @@ export type AuthFormState = {
 };
 
 const MIN_PASSWORD_LENGTH = 8;
+// Hatalı giriş: aynı istemciden aynı hesaba 15 dakikada 10 deneme.
+// (Auth sunucusunun kendi IP sınırı, istekler Next sunucusundan geldiği için kullanıcı ayırt edemez.)
+const loginLimiter = createFailureLimiter({ windowMs: 15 * 60 * 1000, maxFailures: 10 });
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function readString(formData: FormData, key: string): string {
@@ -54,10 +58,16 @@ export async function login(
     return { error: "E-posta ve şifre gerekli.", email };
   }
 
+  const limiterKey = `${await getClientKey()}|${email.toLowerCase()}`;
+  if (loginLimiter.isLimited(limiterKey)) {
+    return { error: "Çok fazla hatalı giriş denemesi. Lütfen 15 dakika sonra tekrar dene.", email };
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    if (error.code === "invalid_credentials") loginLimiter.recordFailure(limiterKey);
     return { error: authErrorMessage(error.code), email };
   }
 
