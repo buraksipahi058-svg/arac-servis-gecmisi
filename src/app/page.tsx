@@ -33,6 +33,13 @@ export default async function HomePage() {
           </>
         )}
       </div>
+
+      <p className="text-center text-sm text-gray-600">
+        {"Sana bir paylaşım kodu mu verildi? "}
+        <Link href="/shared" className="font-medium text-gray-900 underline">
+          Geçmişi görüntüle
+        </Link>
+      </p>
     </main>
   );
 }

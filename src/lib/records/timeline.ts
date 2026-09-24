@@ -16,9 +16,9 @@ export type TimelineEntry = {
   odometerDrop: OdometerReference | null;
 };
 
-export type TimelineYear = {
+export type TimelineYear<T extends TimelineEntry = TimelineEntry> = {
   year: string;
-  entries: TimelineEntry[];
+  entries: T[];
 };
 
 export type TimelineSummary = {
@@ -35,16 +35,16 @@ export function toAttachmentCounts(documents: DocumentTypeRow[]) {
   return { documentCount, photoCount: documents.length - documentCount };
 }
 
-export function annotateOdometerDrops(
-  entries: Omit<TimelineEntry, "odometerDrop">[],
-): TimelineEntry[] {
+export function annotateOdometerDrops<T extends Omit<TimelineEntry, "odometerDrop">>(
+  entries: T[],
+): (T & Pick<TimelineEntry, "odometerDrop">)[] {
   const drops = findOdometerDrops(entries);
   return entries.map((entry) => ({ ...entry, odometerDrop: drops.get(entry.id) ?? null }));
 }
 
 // Girdi en yeni kayıt önce sıralı olmalı; yıllar da aynı sırayla döner.
-export function groupByYear(entries: TimelineEntry[]): TimelineYear[] {
-  const years: TimelineYear[] = [];
+export function groupByYear<T extends TimelineEntry>(entries: T[]): TimelineYear<T>[] {
+  const years: TimelineYear<T>[] = [];
   for (const entry of entries) {
     const year = entry.serviceDate.slice(0, 4);
     const current = years.at(-1);

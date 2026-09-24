@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CreateShareCode } from "@/components/share/create-share-code";
 import { ShareTokenList } from "@/components/share/share-token-list";
+import { getRequestOrigin } from "@/lib/request-origin";
 import { listShareTokens } from "@/lib/share/queries";
 import { formatPlate } from "@/lib/vehicles/plate";
 import { getOwnVehicle } from "@/lib/vehicles/queries";
@@ -17,7 +18,8 @@ export default async function ShareVehiclePage({
   const vehicle = await getOwnVehicle(vehicleId);
   if (!vehicle) notFound();
 
-  const tokens = await listShareTokens(vehicle.id);
+  const [tokens, origin] = await Promise.all([listShareTokens(vehicle.id), getRequestOrigin()]);
+  const sharedUrl = `${origin}/shared`;
 
   return (
     <div className="mx-auto max-w-sm">
@@ -32,10 +34,15 @@ export default async function ShareVehiclePage({
           boyunca gösterir.
         </li>
         <li>E-posta adresin, telefonun ve diğer araçların gösterilmez.</li>
+        <li>
+          {"Alıcı, geçmişi "}
+          <span className="break-all font-medium text-gray-900">{sharedUrl}</span>
+          {" adresinden görüntüler."}
+        </li>
         <li>Kodu istediğin zaman iptal edebilirsin.</li>
       </ul>
 
-      <CreateShareCode action={createShareCode.bind(null, vehicle.id)} />
+      <CreateShareCode action={createShareCode.bind(null, vehicle.id)} sharedUrl={sharedUrl} />
 
       <section className="mt-10">
         <h2 className="text-base font-semibold">Paylaşım kodları</h2>

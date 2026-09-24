@@ -9,9 +9,11 @@ import { formatDateTime } from "@/lib/format";
 
 type CreateShareCodeProps = {
   action: (state: CreateShareCodeState) => Promise<CreateShareCodeState>;
+  // Alıcının kodu gireceği adres.
+  sharedUrl: string;
 };
 
-export function CreateShareCode({ action }: CreateShareCodeProps) {
+export function CreateShareCode({ action, sharedUrl }: CreateShareCodeProps) {
   const [state, formAction] = useActionState(action, {});
   const codeRef = useRef<HTMLParagraphElement>(null);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
@@ -60,6 +62,11 @@ export function CreateShareCode({ action }: CreateShareCodeProps) {
             Kopyala
           </button>
           {copyMessage && <p className="mt-2 text-sm text-gray-600">{copyMessage}</p>}
+          <p className="mt-3 text-sm text-gray-600">
+            {"Alıcı, "}
+            <span className="break-all font-medium text-gray-900">{sharedUrl}</span>
+            {" adresinde plaka ile birlikte bu kodu girer."}
+          </p>
           <p className="mt-3 text-sm font-medium text-gray-800">
             Bu kod yalnızca şimdi gösterilir. Kaydet veya doğrudan paylaşacağın kişiye ilet.
           </p>
