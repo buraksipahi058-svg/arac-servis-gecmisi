@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { RecordListItem } from "@/components/records/record-list-item";
+import { RecordTimeline } from "@/components/records/record-timeline";
+import { TimelineSummary } from "@/components/records/timeline-summary";
 import { buttonClass } from "@/components/ui/button-styles";
-import { listVehicleRecords } from "@/lib/records/queries";
+import { listVehicleTimeline } from "@/lib/records/queries";
+import { groupByYear, summarizeTimeline } from "@/lib/records/timeline";
 import { formatPlate } from "@/lib/vehicles/plate";
 import { getOwnVehicle } from "@/lib/vehicles/queries";
 
@@ -22,7 +24,7 @@ export default async function VehiclePage({
   const vehicle = await getOwnVehicle(vehicleId);
   if (!vehicle) notFound();
 
-  const records = await listVehicleRecords(vehicle.id);
+  const entries = await listVehicleTimeline(vehicle.id);
 
   return (
     <>
@@ -58,18 +60,18 @@ export default async function VehiclePage({
           </Link>
         </div>
 
-        {records.length === 0 ? (
+        {entries.length === 0 ? (
           <div className="mt-3 rounded-xl border border-dashed border-gray-300 bg-white px-4 py-8 text-center">
             <p className="text-gray-600">Henüz servis kaydı yok.</p>
           </div>
         ) : (
-          <ul className="mt-3 flex flex-col gap-3">
-            {records.map((record) => (
-              <li key={record.id}>
-                <RecordListItem record={record} />
-              </li>
-            ))}
-          </ul>
+          <div className="mt-3 flex flex-col gap-5">
+            <TimelineSummary summary={summarizeTimeline(entries)} />
+            <RecordTimeline
+              years={groupByYear(entries)}
+              getRecordHref={(recordId) => `/dashboard/vehicles/${vehicle.id}/records/${recordId}`}
+            />
+          </div>
         )}
       </section>
     </>

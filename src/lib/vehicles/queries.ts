@@ -21,15 +21,34 @@ export const getOwnVehicle = cache(async (vehicleId: string) => {
   return data;
 });
 
-export async function listOwnVehicles() {
+export type VehicleSummary = NonNullable<Awaited<ReturnType<typeof getOwnVehicle>>>;
+
+export type VehicleOverview = VehicleSummary & {
+  recordCount: number;
+  // En yeni tarihli (silinmemiş) kaydın kilometresi.
+  latestKm: number | null;
+};
+
+// Dashboard kartları için araçlar + silinmemiş kayıt sayısı ve son kaydın km'si.
+export async function listOwnVehicles(): Promise<VehicleOverview[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("vehicles")
-    .select(VEHICLE_COLUMNS)
+    .select(`${VEHICLE_COLUMNS}, service_records(service_date, odometer_km, created_at)`)
+    .is("service_records.deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data;
+  return data.map(({ service_records: records, ...vehicle }) => {
+    const latest = records.reduce<(typeof records)[number] | null>(
+      (newest, record) =>
+        !newest ||
+        record.service_date > newest.service_date ||
+        (record.service_date === newest.service_date && record.created_at > newest.created_at)
+          ? record
+          : newest,
+      null,
+    );
+    return { ...vehicle, recordCount: records.length, latestKm: latest?.odometer_km ?? null };
+  });
 }
-
-export type VehicleSummary = NonNullable<Awaited<ReturnType<typeof getOwnVehicle>>>;

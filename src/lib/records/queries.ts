@@ -2,23 +2,31 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/uuid";
+import { toAttachmentCounts, type TimelineEntry } from "./timeline";
 
 const RECORD_COLUMNS =
   "id, vehicle_id, service_date, odometer_km, service_name, description, entered_by, created_at, updated_at";
 
-// Silinmemiş kayıtlar; en yeni servis tarihi önce.
-export async function listVehicleRecords(vehicleId: string) {
+// Silinmemiş kayıtlar ve belge/fotoğraf sayıları; en yeni servis tarihi önce.
+export async function listVehicleTimeline(vehicleId: string): Promise<TimelineEntry[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("service_records")
-    .select(RECORD_COLUMNS)
+    .select("id, service_date, odometer_km, service_name, description, record_documents(type)")
     .eq("vehicle_id", vehicleId)
     .is("deleted_at", null)
     .order("service_date", { ascending: false })
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data;
+  return data.map((record) => ({
+    id: record.id,
+    serviceDate: record.service_date,
+    odometerKm: record.odometer_km,
+    serviceName: record.service_name,
+    description: record.description,
+    ...toAttachmentCounts(record.record_documents),
+  }));
 }
 
 export const getVehicleRecord = cache(async (vehicleId: string, recordId: string) => {
@@ -61,5 +69,4 @@ export async function countAllVehicleRecords(vehicleId: string): Promise<number>
   return count ?? 0;
 }
 
-export type ServiceRecord = NonNullable<Awaited<ReturnType<typeof getVehicleRecord>>>;
 export type RecordAudit = Awaited<ReturnType<typeof listRecordAudits>>[number];
