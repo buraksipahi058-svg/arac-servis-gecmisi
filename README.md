@@ -11,14 +11,18 @@ Next.js 16 (App Router, TypeScript strict, Tailwind) + Supabase (Auth, Postgres 
 ## Özellikler
 
 - Kayıt, giriş, çıkış (Supabase Auth, cookie tabanlı oturum)
-- Araç ekleme/düzenleme/silme (servis kaydı olan araç silinemez)
+- Araç ekleme/düzenleme/silme; araç tipi (otomobil, motosiklet, otobüs, minibüs, kamyonet, kamyon, traktör)
+  (servis kaydı olan araç silinemez)
 - Servis kaydı: tarih, km, servis, işlem açıklaması; düzenleme ve silme değişiklik geçmişine yazılır
 - Belge/fotoğraf: fotoğraflar tarayıcıda ~1600 px'e küçültülüp sıkıştırılır; private bucket, signed URL
 - Yıllara göre zaman çizelgesi, belge/fotoğraf sayıları, km tutarsızlığı uyarısı
 - Paylaşım kodu (`XXXX-XXXX`, 24 saat, iptal edilebilir; yalnızca hash saklanır)
 - Alıcı görünümü: plaka + kod ile, yalnızca araç ve servis geçmişi (sahip bilgisi yok)
+- Kullanıcı profili (görünen ad, il, isteğe bağlı telefon), unvanlar (satıcı / yetkili servis / usta —
+  kendi beyanı), diğer kullanıcıların unvan onayları ve onay listesi, kullanıcı arama (ad, unvan, il)
 
-Uygulama araç hakkında hüküm vermez; yalnızca kayıtları ve kimin eklediğini gösterir.
+Uygulama araç veya kullanıcı hakkında hüküm vermez; kayıtları, kimin eklediğini ve kaç kullanıcının
+bir unvanı onayladığını gösterir ("doğrulanmış" ifadesi kullanılmaz).
 
 ## Sayfalar
 
@@ -30,6 +34,9 @@ Uygulama araç hakkında hüküm vermez; yalnızca kayıtları ve kimin eklediğ
 | `/dashboard/vehicles/[id]` | Araç ve servis geçmişi |
 | `/dashboard/vehicles/[id]/records/[recordId]` | Servis kaydı, belgeler, değişiklik geçmişi |
 | `/dashboard/vehicles/[id]/share` | Paylaşım kodu oluşturma/iptal |
+| `/dashboard/users` | Kullanıcılar: ad, unvan ve ile göre arama |
+| `/dashboard/users/[userId]` | Kullanıcı profili, unvanlar, onay listesi, onayladıkları |
+| `/dashboard/profile` | Profilim (düzenleme) |
 | `/shared` | Alıcı: plaka + kod ile geçmişi görüntüleme |
 
 ## Kurulum (192.168.1.13 Ubuntu hostu)

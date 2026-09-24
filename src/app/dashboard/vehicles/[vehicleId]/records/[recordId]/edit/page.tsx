@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BackLink } from "@/components/ui/back-link";
 import { RecordForm } from "@/components/records/record-form";
+import { cardClass } from "@/components/ui/card";
 import { ConfirmActionButton } from "@/components/ui/confirm-action-button";
 import { todayIsoDate } from "@/lib/format";
 import { getVehicleRecord, listOdometerPoints } from "@/lib/records/queries";
@@ -24,16 +25,15 @@ export default async function EditRecordPage({
   );
 
   return (
-    <div className="mx-auto max-w-sm">
-      <Link href={recordPath} className="text-sm text-gray-500">
-        ← Kayda dön
-      </Link>
-      <h1 className="mb-2 mt-3 text-xl font-semibold">Servis kaydını düzenle</h1>
-      <p className="mb-6 text-sm text-gray-500">
+    <div className="mx-auto max-w-lg">
+      <BackLink href={recordPath}>Kayda dön</BackLink>
+      <h1 className="mb-2 mt-4 text-2xl font-bold tracking-tight">Servis kaydını düzenle</h1>
+      <p className="mb-6 text-sm text-ink-500">
         Yapılan değişiklikler, önceki değerleriyle birlikte kaydın değişiklik geçmişinde görünür.
       </p>
 
-      <RecordForm
+      <div className={`${cardClass} p-5 sm:p-6`}>
+        <RecordForm
         action={updateRecord.bind(null, vehicleId, record.id)}
         initialValues={{
           serviceDate: record.service_date,
@@ -45,9 +45,10 @@ export default async function EditRecordPage({
         submitLabel="Değişiklikleri kaydet"
         pendingText="Kaydediliyor…"
         odometerPoints={odometerPoints}
-      />
+        />
+      </div>
 
-      <div className="mt-10 border-t border-gray-200 pt-6">
+      <div className="mt-8">
         <ConfirmActionButton
           action={deleteRecord.bind(null, vehicleId, record.id)}
           confirmMessage="Bu servis kaydı silinsin mi? Silinen kayıt geri alınamaz."

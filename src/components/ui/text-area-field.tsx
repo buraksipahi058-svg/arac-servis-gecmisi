@@ -12,7 +12,7 @@ export function TextAreaField({ label, name, error, id, ...textAreaProps }: Text
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={fieldId} className="text-sm font-medium text-gray-800">
+      <label htmlFor={fieldId} className="text-sm font-semibold text-ink-800">
         {label}
       </label>
       <textarea
@@ -20,10 +20,10 @@ export function TextAreaField({ label, name, error, id, ...textAreaProps }: Text
         name={name}
         aria-invalid={error ? true : undefined}
         aria-describedby={errorId}
-        className={`min-h-28 rounded-lg border bg-white px-3 py-2.5 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+        className={`min-h-28 rounded-xl border bg-white shadow-sm transition-colors px-3 py-2.5 text-base text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-4 ${
           error
             ? "border-red-400 focus:border-red-500 focus:ring-red-500/15"
-            : "border-gray-300 focus:border-gray-900 focus:ring-gray-900/10"
+            : "border-sand-300 focus:border-ink-700 focus:ring-gold-400/30"
         }`}
         {...textAreaProps}
       />

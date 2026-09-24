@@ -5,7 +5,9 @@ import type { VehicleFormState } from "@/app/dashboard/vehicles/actions";
 import { FormAlert } from "@/components/ui/form-alert";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { TextField } from "@/components/ui/text-field";
+import { VehicleTypeIcon } from "@/components/vehicles/vehicle-type-icon";
 import type { VehicleFormValues } from "@/lib/vehicles/validation";
+import { DEFAULT_VEHICLE_TYPE, VEHICLE_TYPES } from "@/lib/vehicles/vehicle-types";
 
 type VehicleFormProps = {
   action: (state: VehicleFormState, formData: FormData) => Promise<VehicleFormState>;
@@ -14,7 +16,13 @@ type VehicleFormProps = {
   pendingText: string;
 };
 
-const EMPTY_VALUES: VehicleFormValues = { plate: "", make: "", model: "", modelYear: "" };
+const EMPTY_VALUES: VehicleFormValues = {
+  vehicleType: DEFAULT_VEHICLE_TYPE,
+  plate: "",
+  make: "",
+  model: "",
+  modelYear: "",
+};
 
 export function VehicleForm({
   action,
@@ -27,8 +35,31 @@ export function VehicleForm({
   const errors = state.errors ?? {};
 
   return (
-    <form action={formAction} className="flex flex-col gap-4" noValidate>
+    <form action={formAction} className="flex flex-col gap-5" noValidate>
       {state.formError && <FormAlert tone="error">{state.formError}</FormAlert>}
+
+      <fieldset>
+        <legend className="text-sm font-semibold text-ink-800">Araç tipi</legend>
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {VEHICLE_TYPES.map((type) => (
+            <label
+              key={type.value}
+              className="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border border-sand-300 bg-white px-2 py-3 text-center text-sm font-medium text-ink-700 shadow-sm transition-colors hover:border-ink-300 has-checked:border-ink-900 has-checked:bg-ink-900 has-checked:text-white has-focus-visible:ring-4 has-focus-visible:ring-gold-400/40"
+            >
+              <input
+                type="radio"
+                name="vehicleType"
+                value={type.value}
+                defaultChecked={values.vehicleType === type.value}
+                className="sr-only"
+              />
+              <VehicleTypeIcon type={type.value} className="size-6" strokeWidth={1.75} />
+              <span className="leading-tight">{type.label}</span>
+            </label>
+          ))}
+        </div>
+        {errors.vehicleType && <p className="mt-1.5 text-sm text-red-700">{errors.vehicleType}</p>}
+      </fieldset>
 
       <TextField
         label="Plaka"

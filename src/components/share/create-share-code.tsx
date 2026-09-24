@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
+import { Copy, KeyRound } from "lucide-react";
 import type { CreateShareCodeState } from "@/app/dashboard/vehicles/[vehicleId]/share/actions";
 import { buttonClass } from "@/components/ui/button-styles";
 import { FormAlert } from "@/components/ui/form-alert";
@@ -42,32 +43,36 @@ export function CreateShareCode({ action, sharedUrl }: CreateShareCodeProps) {
       {state.error && <FormAlert tone="error">{state.error}</FormAlert>}
 
       {state.code && state.expiresAt && (
-        <div className="rounded-xl border-2 border-gray-900 bg-white p-4 text-center">
-          <p className="text-sm text-gray-600">Paylaşım kodu</p>
+        <div className="rounded-2xl bg-gradient-to-br from-ink-950 to-ink-800 p-5 text-center text-white shadow-card">
+          <p className="inline-flex items-center gap-1.5 text-sm text-ink-200">
+            <KeyRound aria-hidden className="size-4 text-gold-300" />
+            Paylaşım kodu
+          </p>
           <p
             ref={codeRef}
             data-testid="share-code"
-            className="mt-1 select-all font-mono text-3xl font-semibold tracking-widest"
+            className="mt-2 select-all font-mono text-3xl font-bold tracking-[0.2em] text-gold-300"
           >
             {state.code}
           </p>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-ink-200">
             {`${formatDateTime(state.expiresAt)} tarihine kadar geçerli.`}
           </p>
           <button
             type="button"
             onClick={copyCode}
-            className={`${buttonClass("secondary", "sm")} mt-3 w-full`}
+            className={`${buttonClass("onDark", "sm")} mt-4 w-full`}
           >
+            <Copy aria-hidden />
             Kopyala
           </button>
-          {copyMessage && <p className="mt-2 text-sm text-gray-600">{copyMessage}</p>}
-          <p className="mt-3 text-sm text-gray-600">
+          {copyMessage && <p className="mt-2 text-sm text-ink-200">{copyMessage}</p>}
+          <p className="mt-4 text-sm text-ink-200">
             {"Alıcı, "}
-            <span className="break-all font-medium text-gray-900">{sharedUrl}</span>
+            <span className="font-mono text-[0.8rem] font-semibold text-white [overflow-wrap:anywhere]">{sharedUrl}</span>
             {" adresinde plaka ile birlikte bu kodu girer."}
           </p>
-          <p className="mt-3 text-sm font-medium text-gray-800">
+          <p className="mt-3 text-sm font-semibold text-gold-200">
             Bu kod yalnızca şimdi gösterilir. Kaydet veya doğrudan paylaşacağın kişiye ilet.
           </p>
         </div>

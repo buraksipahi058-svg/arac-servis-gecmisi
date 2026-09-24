@@ -1,5 +1,7 @@
-import Link from "next/link";
+import { LogOut } from "lucide-react";
 import { logout } from "@/app/(auth)/actions";
+import { Brand } from "@/components/brand";
+import { DashboardNav } from "@/components/dashboard-nav";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { requireUser } from "@/lib/auth";
 
@@ -9,28 +11,23 @@ export default async function DashboardLayout({ children }: LayoutProps<"/dashbo
 
   return (
     <div className="min-h-dvh">
-      <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-3 px-4">
-          <Link href="/dashboard" className="truncate text-sm font-semibold">
-            Araç Servis Geçmişi
-          </Link>
+      <header className="bg-ink-900 text-white">
+        <div className="mx-auto flex h-16 w-full max-w-3xl items-center justify-between gap-3 px-4">
+          <Brand href="/dashboard" tone="light" />
           <div className="flex min-w-0 items-center gap-3">
-            <span className="hidden truncate text-sm text-gray-500 sm:inline">
-              {user.email}
-            </span>
+            <span className="hidden truncate text-sm text-ink-200 sm:inline">{user.email}</span>
             <form action={logout}>
-              <SubmitButton
-                variant="secondary"
-                size="sm"
-                pendingText="Çıkılıyor…"
-              >
+              <SubmitButton variant="onDark" size="sm" pendingText="Çıkılıyor…">
+                <LogOut aria-hidden />
                 Çıkış yap
               </SubmitButton>
             </form>
           </div>
         </div>
+        <div aria-hidden className="h-0.5 bg-gradient-to-r from-gold-500 via-gold-300 to-transparent" />
       </header>
-      <main className="mx-auto w-full max-w-2xl px-4 py-6">{children}</main>
+      <DashboardNav />
+      <main className="mx-auto w-full max-w-3xl px-4 py-8">{children}</main>
     </div>
   );
 }

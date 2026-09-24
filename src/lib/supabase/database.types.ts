@@ -69,6 +69,62 @@ export type Database = {
           },
         ]
       }
+      profile_titles: {
+        Row: {
+          created_at: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          title: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_titles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          bio: string | null
+          city: string | null
+          created_at: string
+          display_name: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          display_name: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          display_name?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       record_documents: {
         Row: {
           created_at: string
@@ -232,6 +288,42 @@ export type Database = {
         }
         Relationships: []
       }
+      title_endorsements: {
+        Row: {
+          created_at: string
+          endorser_id: string
+          holder_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          endorser_id?: string
+          holder_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          endorser_id?: string
+          holder_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "title_endorsements_endorser_id_fkey"
+            columns: ["endorser_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "title_endorsements_holder_id_title_fkey"
+            columns: ["holder_id", "title"]
+            isOneToOne: false
+            referencedRelation: "profile_titles"
+            referencedColumns: ["user_id", "title"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           created_at: string
@@ -242,6 +334,7 @@ export type Database = {
           owner_id: string
           plate: string
           updated_at: string
+          vehicle_type: string
         }
         Insert: {
           created_at?: string
@@ -252,6 +345,7 @@ export type Database = {
           owner_id?: string
           plate: string
           updated_at?: string
+          vehicle_type?: string
         }
         Update: {
           created_at?: string
@@ -262,6 +356,7 @@ export type Database = {
           owner_id?: string
           plate?: string
           updated_at?: string
+          vehicle_type?: string
         }
         Relationships: []
       }

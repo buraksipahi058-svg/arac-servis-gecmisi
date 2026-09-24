@@ -14,6 +14,13 @@
 4. **Paylaşım görünümü:** Plaka + kod sunucuda doğrulanır (hash, plaka, süre, iptal); tüm hatalarda aynı
    mesaj. Service role client (`src/lib/supabase/admin.ts`, `server-only`) yalnızca burada ve yalnızca
    whitelist alanlar için kullanılır. Erişim httpOnly çerezle, her istekte yeniden doğrulanır.
+5. **Profiller ve onaylar:** Profiller yalnızca giriş yapmış kullanıcılara açıktır (anonim erişim ve
+   paylaşım görünümü dışında); e-posta profilde tutulmaz, telefon isteğe bağlıdır. Kullanıcı yalnızca kendi
+   profilini ve unvanlarını düzenler. Onay veren kişi DB'de `auth.uid()` ile belirlenir (başkası adına onay
+   verilemez), onay için profil gerekir, kendi unvanı onaylanamaz, aynı unvan bir kez onaylanır, onayı
+   yalnızca veren geri alır; unvan kaldırılınca onayları silinir.
+   Not: Onaylar kullanıcı beyanıdır; sahte hesaplarla sayı şişirilebilir. Uygulama bunları "doğrulanmış"
+   olarak sunmaz.
 
 ## Otomatik kontroller
 

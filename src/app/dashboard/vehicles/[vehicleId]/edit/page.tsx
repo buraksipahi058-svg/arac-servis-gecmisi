@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BackLink } from "@/components/ui/back-link";
+import { cardClass } from "@/components/ui/card";
 import { ConfirmActionButton } from "@/components/ui/confirm-action-button";
 import { VehicleForm } from "@/components/vehicles/vehicle-form";
 import { countAllVehicleRecords } from "@/lib/records/queries";
@@ -21,29 +22,28 @@ export default async function EditVehiclePage({
   const recordCount = await countAllVehicleRecords(vehicle.id);
 
   return (
-    <div className="mx-auto max-w-sm">
-      <Link href={`/dashboard/vehicles/${vehicle.id}`} className="text-sm text-gray-500">
-        ← {plateLabel}
-      </Link>
-      <h1 className="mb-6 mt-3 text-xl font-semibold">Aracı düzenle</h1>
+    <div className="mx-auto max-w-lg">
+      <BackLink href={`/dashboard/vehicles/${vehicle.id}`}>{plateLabel}</BackLink>
+      <h1 className="mb-5 mt-4 text-2xl font-bold tracking-tight">Aracı düzenle</h1>
 
-      <VehicleForm
-        action={updateVehicle.bind(null, vehicle.id)}
-        initialValues={{
-          plate: plateLabel,
-          make: vehicle.make,
-          model: vehicle.model,
-          modelYear: String(vehicle.model_year),
-        }}
-        submitLabel="Değişiklikleri kaydet"
-        pendingText="Kaydediliyor…"
-      />
+      <div className={`${cardClass} p-5 sm:p-6`}>
+        <VehicleForm
+          action={updateVehicle.bind(null, vehicle.id)}
+          initialValues={{
+            vehicleType: vehicle.vehicle_type,
+            plate: plateLabel,
+            make: vehicle.make,
+            model: vehicle.model,
+            modelYear: String(vehicle.model_year),
+          }}
+          submitLabel="Değişiklikleri kaydet"
+          pendingText="Kaydediliyor…"
+        />
+      </div>
 
-      <div className="mt-10 border-t border-gray-200 pt-6">
+      <div className="mt-8">
         {recordCount > 0 ? (
-          <p className="text-sm text-gray-500">
-            Servis kaydı olan araç silinemez.
-          </p>
+          <p className="text-sm text-ink-500">Servis kaydı olan araç silinemez.</p>
         ) : (
           <ConfirmActionButton
             action={deleteVehicle.bind(null, vehicle.id)}

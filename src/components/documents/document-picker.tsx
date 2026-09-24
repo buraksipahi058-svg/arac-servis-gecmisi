@@ -53,13 +53,13 @@ export function DocumentPicker({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium text-gray-800">{label}</span>
+      <span className="text-sm font-medium text-ink-800">{label}</span>
 
       <label
-        className={`flex h-12 items-center justify-center rounded-lg border border-dashed border-gray-400 bg-white px-4 text-base font-medium text-gray-800 ${
+        className={`flex h-12 items-center justify-center rounded-lg border border-dashed border-ink-300 bg-white px-4 text-base font-medium text-ink-800 ${
           disabled || remaining <= 0
             ? "cursor-not-allowed opacity-60"
-            : "cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-gray-900"
+            : "cursor-pointer hover:bg-sand-50 focus-within:ring-2 focus-within:ring-gold-400"
         }`}
       >
         + Dosya seç
@@ -72,7 +72,7 @@ export function DocumentPicker({
           className="sr-only"
         />
       </label>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-ink-500">
         {`JPG, PNG, WEBP veya PDF · ${Math.max(remaining, 0)} dosya daha eklenebilir. Fotoğraflar yüklenmeden önce küçültülür.`}
       </p>
 
@@ -85,7 +85,7 @@ export function DocumentPicker({
       )}
 
       {files.length > 0 && (
-        <ul className="flex flex-col divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
+        <ul className="flex flex-col divide-y divide-sand-200 rounded-lg border border-sand-200 bg-white">
           {files.map((file, index) => (
             <li
               key={`${file.name}-${file.size}-${file.lastModified}`}
@@ -93,7 +93,7 @@ export function DocumentPicker({
             >
               <span className="min-w-0 truncate">{file.name}</span>
               <span className="flex shrink-0 items-center gap-3">
-                <span className="text-gray-500">{formatFileSize(file.size)}</span>
+                <span className="text-ink-500">{formatFileSize(file.size)}</span>
                 <button
                   type="button"
                   onClick={() => removeAt(index)}

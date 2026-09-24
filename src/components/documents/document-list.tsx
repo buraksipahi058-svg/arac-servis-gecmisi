@@ -26,11 +26,11 @@ export function DocumentList({ documents, renderRemove }: DocumentListProps) {
                     src={photo.url}
                     alt={photo.fileName}
                     loading="lazy"
-                    className="aspect-square w-full rounded-lg border border-gray-200 object-cover"
+                    className="aspect-square w-full rounded-lg border border-sand-200 object-cover"
                   />
                 </a>
               ) : (
-                <div className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-gray-300 text-xs text-gray-500">
+                <div className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-sand-300 text-xs text-ink-500">
                   Dosya bulunamadı
                 </div>
               )}
@@ -45,7 +45,7 @@ export function DocumentList({ documents, renderRemove }: DocumentListProps) {
           {pdfs.map((pdf) => (
             <li
               key={pdf.id}
-              className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2"
+              className="flex items-center justify-between gap-3 rounded-lg border border-sand-200 bg-white px-3 py-2"
             >
               <div className="min-w-0">
                 {pdf.url ? (
@@ -58,9 +58,9 @@ export function DocumentList({ documents, renderRemove }: DocumentListProps) {
                     {pdf.fileName}
                   </a>
                 ) : (
-                  <span className="block truncate text-gray-500">{pdf.fileName}</span>
+                  <span className="block truncate text-ink-500">{pdf.fileName}</span>
                 )}
-                <span className="text-xs text-gray-500">{`PDF · ${formatFileSize(pdf.fileSize)}`}</span>
+                <span className="text-xs text-ink-500">{`PDF · ${formatFileSize(pdf.fileSize)}`}</span>
               </div>
               {renderRemove?.(pdf)}
             </li>

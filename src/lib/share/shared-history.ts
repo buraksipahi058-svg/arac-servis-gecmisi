@@ -15,7 +15,7 @@ export type SharedEntry = TimelineEntry & {
 };
 
 export type SharedHistory = {
-  vehicle: { plate: string; make: string; model: string; modelYear: number };
+  vehicle: { plate: string; make: string; model: string; modelYear: number; vehicleType: string };
   expiresAt: string;
   entries: SharedEntry[];
 };
@@ -26,7 +26,7 @@ export async function loadSharedHistory(access: ShareAccess): Promise<SharedHist
   const [vehicleResult, recordsResult] = await Promise.all([
     admin
       .from("vehicles")
-      .select("plate, make, model, model_year")
+      .select("plate, make, model, model_year, vehicle_type")
       .eq("id", access.vehicleId)
       .single(),
     admin
@@ -96,6 +96,7 @@ export async function loadSharedHistory(access: ShareAccess): Promise<SharedHist
       make: vehicle.make,
       model: vehicle.model,
       modelYear: vehicle.model_year,
+      vehicleType: vehicle.vehicle_type,
     },
     expiresAt: access.expiresAt,
     entries,

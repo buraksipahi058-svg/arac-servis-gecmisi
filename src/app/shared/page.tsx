@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import Link from "next/link";
+import { Brand } from "@/components/brand";
 import { OpenSharedForm } from "@/components/share/open-shared-form";
 import { SharedHistoryView } from "@/components/share/shared-history-view";
+import { cardClass } from "@/components/ui/card";
 import { FormAlert } from "@/components/ui/form-alert";
 import { decodeAccessCookie, SHARE_ACCESS_COOKIE, verifyShareAccess } from "@/lib/share/access";
 import { loadSharedHistory } from "@/lib/share/shared-history";
@@ -20,18 +21,16 @@ export default async function SharedPage() {
   const history = access ? await loadSharedHistory(access) : null;
 
   return (
-    <main className="mx-auto w-full max-w-lg px-4 py-8">
-      <Link href="/" className="text-sm font-semibold text-gray-500">
-        Araç Servis Geçmişi
-      </Link>
+    <main className="mx-auto w-full max-w-2xl px-4 py-8">
+      <Brand />
 
-      <div className="mt-6">
+      <div className="mt-8">
         {history ? (
           <SharedHistoryView history={history} />
         ) : (
-          <div className="mx-auto max-w-sm">
-            <h1 className="text-2xl font-semibold">Paylaşılan geçmişi görüntüle</h1>
-            <p className="mb-6 mt-2 text-gray-600">
+          <div className={`${cardClass} mx-auto max-w-md p-6 sm:p-8`}>
+            <h1 className="text-2xl font-bold tracking-tight">Paylaşılan geçmişi görüntüle</h1>
+            <p className="mb-6 mt-2 text-ink-600">
               Araç sahibinden aldığın paylaşım kodunu, aracın plakasıyla birlikte gir.
             </p>
             {cookieValue && (

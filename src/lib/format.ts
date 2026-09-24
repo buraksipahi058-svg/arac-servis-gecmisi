@@ -23,6 +23,18 @@ export function formatDate(isoDate: string): string {
   return dateFormatter.format(new Date(`${isoDate}T00:00:00Z`));
 }
 
+const timestampDateFormatter = new Intl.DateTimeFormat("tr-TR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  timeZone: APP_TIME_ZONE,
+});
+
+// Zaman damgası (timestamptz) → "12.03.2025" (Türkiye saatine göre gün)
+export function formatTimestampDate(timestamp: string): string {
+  return timestampDateFormatter.format(new Date(timestamp));
+}
+
 // Zaman damgası (timestamptz) → "12.03.2025 14:05" (Türkiye saati)
 export function formatDateTime(timestamp: string): string {
   return dateTimeFormatter.format(new Date(timestamp));

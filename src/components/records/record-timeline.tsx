@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { Calendar, Camera, FileText, Gauge, TriangleAlert } from "lucide-react";
+import { cardClass } from "@/components/ui/card";
 import { formatDate, formatKm } from "@/lib/format";
-import { attachmentLabels, type TimelineEntry, type TimelineYear } from "@/lib/records/timeline";
+import type { TimelineEntry, TimelineYear } from "@/lib/records/timeline";
 
 type RecordTimelineProps<T extends TimelineEntry> = {
   years: TimelineYear<T>[];
@@ -11,7 +13,7 @@ type RecordTimelineProps<T extends TimelineEntry> = {
   renderDetails?: (entry: T) => ReactNode;
 };
 
-const CARD_CLASS = "block rounded-xl border border-gray-200 bg-white p-4";
+const ENTRY_CARD = `${cardClass} block p-4 sm:p-5`;
 
 // Servis kayıtları, yıllara göre gruplu ve en yeni önce.
 export function RecordTimeline<T extends TimelineEntry>({
@@ -20,37 +22,37 @@ export function RecordTimeline<T extends TimelineEntry>({
   renderDetails,
 }: RecordTimelineProps<T>) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-7">
       {years.map(({ year, entries }) => (
         <section key={year} aria-labelledby={`year-${year}`}>
-          <h3 id={`year-${year}`} className="text-sm font-semibold text-gray-500">
+          <h3
+            id={`year-${year}`}
+            className="inline-flex rounded-full bg-ink-900 px-3 py-1 text-xs font-bold tracking-wider text-white"
+          >
             {year}
           </h3>
-          <ol className="mt-2 flex flex-col gap-3 border-l-2 border-gray-200 pl-4">
-            {entries.map((entry) => {
-              const labels = attachmentLabels(entry);
-              return (
-                <li key={entry.id} className="relative">
-                  <span
-                    aria-hidden
-                    className="absolute -left-[23px] top-5 h-3 w-3 rounded-full border-2 border-white bg-gray-400"
-                  />
-                  {getRecordHref ? (
-                    <Link
-                      href={getRecordHref(entry.id)}
-                      className={`${CARD_CLASS} transition-colors hover:bg-gray-50`}
-                    >
-                      <EntrySummary entry={entry} labels={labels} clampDescription />
-                    </Link>
-                  ) : (
-                    <div className={CARD_CLASS}>
-                      <EntrySummary entry={entry} labels={labels} />
-                      {renderDetails?.(entry)}
-                    </div>
-                  )}
-                </li>
-              );
-            })}
+          <ol className="ml-3 mt-3 flex flex-col gap-3 border-l-2 border-sand-300 pl-5">
+            {entries.map((entry) => (
+              <li key={entry.id} className="relative">
+                <span
+                  aria-hidden
+                  className="absolute -left-[27px] top-6 size-3 rounded-full bg-gold-500 ring-4 ring-sand-50"
+                />
+                {getRecordHref ? (
+                  <Link
+                    href={getRecordHref(entry.id)}
+                    className={`${ENTRY_CARD} transition-all hover:-translate-y-0.5 hover:border-sand-300 hover:shadow-md`}
+                  >
+                    <EntrySummary entry={entry} clampDescription />
+                  </Link>
+                ) : (
+                  <div className={ENTRY_CARD}>
+                    <EntrySummary entry={entry} />
+                    {renderDetails?.(entry)}
+                  </div>
+                )}
+              </li>
+            ))}
           </ol>
         </section>
       ))}
@@ -58,42 +60,55 @@ export function RecordTimeline<T extends TimelineEntry>({
   );
 }
 
+const CHIP = "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold";
+
 function EntrySummary({
   entry,
-  labels,
   clampDescription = false,
 }: {
   entry: TimelineEntry;
-  labels: string[];
   clampDescription?: boolean;
 }) {
+  const hasChips = entry.odometerDrop || entry.documentCount > 0 || entry.photoCount > 0;
+
   return (
     <>
-      <div className="flex items-baseline justify-between gap-3 text-sm text-gray-500">
-        <span>{formatDate(entry.serviceDate)}</span>
-        <span className="font-medium text-gray-700">{formatKm(entry.odometerKm)}</span>
+      <div className="flex items-center justify-between gap-3 text-sm">
+        <span className="inline-flex items-center gap-1.5 text-ink-500">
+          <Calendar aria-hidden className="size-3.5" />
+          {formatDate(entry.serviceDate)}
+        </span>
+        <span className="inline-flex items-center gap-1.5 font-semibold tabular-nums text-ink-900">
+          <Gauge aria-hidden className="size-4 text-gold-600" />
+          {formatKm(entry.odometerKm)}
+        </span>
       </div>
-      <p className="mt-1 font-medium">{entry.serviceName}</p>
+      <p className="mt-2 font-semibold text-ink-900">{entry.serviceName}</p>
       <p
-        className={`mt-0.5 break-words text-gray-600 ${clampDescription ? "line-clamp-2" : "whitespace-pre-line"}`}
+        className={`mt-0.5 break-words text-ink-600 ${clampDescription ? "line-clamp-2" : "whitespace-pre-line"}`}
       >
         {entry.description}
       </p>
-      {(labels.length > 0 || entry.odometerDrop) && (
-        <p className="mt-2 flex flex-wrap gap-2">
+      {hasChips && (
+        <p className="mt-3 flex flex-wrap gap-2">
           {entry.odometerDrop && (
-            <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
+            <span className={`${CHIP} bg-amber-100 text-amber-900`}>
+              <TriangleAlert aria-hidden className="size-3.5" />
               Kilometre tutarsızlığı
             </span>
           )}
-          {labels.map((label) => (
-            <span
-              key={label}
-              className="rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700"
-            >
-              {label}
+          {entry.documentCount > 0 && (
+            <span className={`${CHIP} bg-sand-100 text-ink-700`}>
+              <FileText aria-hidden className="size-3.5" />
+              {`${entry.documentCount} belge`}
             </span>
-          ))}
+          )}
+          {entry.photoCount > 0 && (
+            <span className={`${CHIP} bg-sand-100 text-ink-700`}>
+              <Camera aria-hidden className="size-3.5" />
+              {`${entry.photoCount} fotoğraf`}
+            </span>
+          )}
         </p>
       )}
     </>

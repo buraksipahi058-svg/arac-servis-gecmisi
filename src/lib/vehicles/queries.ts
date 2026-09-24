@@ -3,7 +3,7 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/uuid";
 
-export const VEHICLE_COLUMNS = "id, plate, make, model, model_year";
+export const VEHICLE_COLUMNS = "id, plate, make, model, model_year, vehicle_type";
 
 // Aynı istekte generateMetadata ve sayfa aynı aracı istediğinde tek sorgu yapılır.
 // RLS sayesinde başka kullanıcının aracı için null döner.

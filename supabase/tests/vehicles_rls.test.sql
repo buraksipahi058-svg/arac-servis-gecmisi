@@ -3,7 +3,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(16);
+select plan(19);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'owner-a@test.local'),
@@ -51,6 +51,21 @@ select throws_ok(
   '23514',
   null,
   'geçersiz plaka biçimi reddedilir'
+);
+select is(
+  (select vehicle_type from public.vehicles where plate = '06DEF45'),
+  'car',
+  'araç tipi belirtilmezse otomobil kabul edilir'
+);
+select lives_ok(
+  $$ insert into public.vehicles (plate, make, model, model_year, vehicle_type) values ('35MT123', 'Honda', 'CBR', 2022, 'motorcycle') $$,
+  'araç sahibi araç tipini belirleyebilir'
+);
+select throws_ok(
+  $$ insert into public.vehicles (plate, make, model, model_year, vehicle_type) values ('35UC456', 'X', 'Y', 2022, 'ufo') $$,
+  '23514',
+  null,
+  'geçersiz araç tipi reddedilir'
 );
 
 -- ---------- Kullanıcı B ----------
@@ -111,7 +126,7 @@ select is(
 );
 select is(
   (select count(*) from public.vehicles),
-  2::bigint,
+  3::bigint,
   'B''nin silme denemesi A''nın aracını silmedi; A yalnızca kendi aracını görür'
 );
 select lives_ok(

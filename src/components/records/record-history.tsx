@@ -1,3 +1,5 @@
+import { History } from "lucide-react";
+import { cardClass } from "@/components/ui/card";
 import type { Json } from "@/lib/supabase/database.types";
 import { formatDate, formatDateTime, formatKm } from "@/lib/format";
 import type { RecordAudit } from "@/lib/records/queries";
@@ -47,17 +49,24 @@ export function RecordHistory({ audits }: { audits: RecordAudit[] }) {
   if (audits.length === 0) return null;
 
   return (
-    <section className="mt-8">
-      <h2 className="text-base font-semibold">Değişiklik geçmişi</h2>
-      <ol className="mt-3 flex flex-col gap-3 border-l border-gray-200 pl-4">
+    <section className={`${cardClass} mt-5 p-5 sm:p-6`}>
+      <h2 className="flex items-center gap-2 text-base font-bold">
+        <History aria-hidden className="size-4 text-gold-600" />
+        Değişiklik geçmişi
+      </h2>
+      <ol className="ml-1.5 mt-4 flex flex-col gap-4 border-l-2 border-sand-200 pl-4">
         {audits.map((audit) => {
           const { title, changes } = describeAudit(audit);
           return (
-            <li key={audit.id} className="text-sm">
-              <p className="font-medium text-gray-800">{title}</p>
-              <p className="text-gray-500">{formatDateTime(audit.created_at)}</p>
+            <li key={audit.id} className="relative text-sm">
+              <span
+                aria-hidden
+                className="absolute -left-[23px] top-1.5 size-2.5 rounded-full bg-gold-500 ring-4 ring-white"
+              />
+              <p className="font-semibold text-ink-800">{title}</p>
+              <p className="text-ink-500">{formatDateTime(audit.created_at)}</p>
               {changes.length > 0 && (
-                <ul className="mt-1 flex flex-col gap-0.5 text-gray-600">
+                <ul className="mt-1 flex flex-col gap-0.5 text-ink-600">
                   {changes.map((change) => (
                     <li key={change} className="break-words">
                       {change}

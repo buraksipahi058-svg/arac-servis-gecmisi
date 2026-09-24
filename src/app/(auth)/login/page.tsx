@@ -10,11 +10,11 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
 
   return (
     <>
-      <h1 className="mb-6 text-2xl font-semibold">Giriş yap</h1>
+      <h1 className="mb-6 text-2xl font-bold tracking-tight">Giriş yap</h1>
       <LoginForm nextPath={safeNextPath(next)} />
-      <p className="mt-6 text-center text-sm text-gray-600">
+      <p className="mt-6 text-center text-sm text-ink-600">
         Hesabın yok mu?{" "}
-        <Link href="/signup" className="font-medium text-gray-900 underline">
+        <Link href="/signup" className="font-semibold text-ink-900 underline decoration-gold-400 decoration-2 underline-offset-4">
           Kayıt ol
         </Link>
       </p>

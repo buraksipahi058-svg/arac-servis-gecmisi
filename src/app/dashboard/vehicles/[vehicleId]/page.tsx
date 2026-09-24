@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ClipboardList, Pencil, Share2 } from "lucide-react";
 import { RecordTimeline } from "@/components/records/record-timeline";
 import { TimelineSummary } from "@/components/records/timeline-summary";
+import { BackLink } from "@/components/ui/back-link";
 import { buttonClass } from "@/components/ui/button-styles";
+import { emptyStateClass } from "@/components/ui/card";
+import { Plate } from "@/components/vehicles/plate";
+import { VehicleTypeIcon } from "@/components/vehicles/vehicle-type-icon";
 import { listVehicleTimeline } from "@/lib/records/queries";
 import { groupByYear, summarizeTimeline } from "@/lib/records/timeline";
 import { formatPlate } from "@/lib/vehicles/plate";
 import { getOwnVehicle } from "@/lib/vehicles/queries";
+import { vehicleTypeLabel } from "@/lib/vehicles/vehicle-types";
 
 export async function generateMetadata({
   params,
@@ -28,38 +34,44 @@ export default async function VehiclePage({
 
   return (
     <>
-      <Link href="/dashboard" className="text-sm text-gray-500">
-        ← Araçlarım
-      </Link>
+      <BackLink href="/dashboard">Araçlarım</BackLink>
 
-      <section className="mt-3 rounded-xl border border-gray-200 bg-white p-4">
-        <div className="flex items-start justify-between gap-3">
+      <section className="mt-4 overflow-hidden rounded-2xl bg-gradient-to-br from-ink-900 to-ink-800 p-5 text-white shadow-card sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold tracking-wide">{formatPlate(vehicle.plate)}</h1>
-            <p className="mt-0.5 text-gray-600">
+            <h1>
+              <Plate plate={vehicle.plate} size="lg" />
+            </h1>
+            <p className="mt-3 text-lg font-semibold">
               {`${vehicle.make} ${vehicle.model} ${vehicle.model_year}`}
+            </p>
+            <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-ink-200">
+              <VehicleTypeIcon type={vehicle.vehicle_type} className="size-4 text-gold-300" />
+              {vehicleTypeLabel(vehicle.vehicle_type)}
             </p>
           </div>
           <div className="flex shrink-0 gap-2">
             <Link
               href={`/dashboard/vehicles/${vehicle.id}/share`}
-              className={buttonClass("secondary", "sm")}
+              className={buttonClass("accent", "sm")}
             >
+              <Share2 aria-hidden />
               Paylaş
             </Link>
             <Link
               href={`/dashboard/vehicles/${vehicle.id}/edit`}
-              className={buttonClass("secondary", "sm")}
+              className={buttonClass("onDark", "sm")}
             >
+              <Pencil aria-hidden />
               Düzenle
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="mt-6">
+      <section className="mt-8">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">Servis Geçmişi</h2>
+          <h2 className="text-xl font-bold tracking-tight">Servis Geçmişi</h2>
           <Link
             href={`/dashboard/vehicles/${vehicle.id}/records/new`}
             className={`${buttonClass("primary", "sm")} shrink-0`}
@@ -69,11 +81,14 @@ export default async function VehiclePage({
         </div>
 
         {entries.length === 0 ? (
-          <div className="mt-3 rounded-xl border border-dashed border-gray-300 bg-white px-4 py-8 text-center">
-            <p className="text-gray-600">Henüz servis kaydı yok.</p>
+          <div className={`${emptyStateClass} mt-4`}>
+            <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-gold-50 text-gold-700">
+              <ClipboardList aria-hidden className="size-6" />
+            </span>
+            <p className="text-ink-600">Henüz servis kaydı yok.</p>
           </div>
         ) : (
-          <div className="mt-3 flex flex-col gap-5">
+          <div className="mt-4 flex flex-col gap-6">
             <TimelineSummary summary={summarizeTimeline(entries)} />
             <RecordTimeline
               years={groupByYear(entries)}

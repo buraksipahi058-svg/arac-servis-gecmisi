@@ -1,8 +1,45 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+/* Yazı tipi: next/font ile yüklenen Plus Jakarta Sans (layout.tsx, --font-jakarta). */
+@theme inline {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+}
+
+@theme {
+  /* Lacivert: ana renk, metin ve koyu yüzeyler */
+  --color-ink-50: #f2f4f8;
+  --color-ink-100: #e3e8f0;
+  --color-ink-200: #c5cfdd;
+  --color-ink-300: #9aa9c0;
+  --color-ink-400: #6e809c;
+  --color-ink-500: #4d5f7c;
+  --color-ink-600: #3a4a64;
+  --color-ink-700: #2b3950;
+  --color-ink-800: #1c283c;
+  --color-ink-900: #121c2d;
+  --color-ink-950: #0b1220;
+
+  /* Altın: vurgu (ikon iğnesi, zaman çizelgesi, öne çıkan eylemler) */
+  --color-gold-50: #fcf8ee;
+  --color-gold-100: #f7ecd2;
+  --color-gold-200: #eed7a1;
+  --color-gold-300: #e3be6c;
+  --color-gold-400: #d9a948;
+  --color-gold-500: #c9922f;
+  --color-gold-600: #a97523;
+  --color-gold-700: #875a1e;
+
+  /* Sıcak nötr: zemin ve kenarlıklar */
+  --color-sand-50: #faf8f5;
+  --color-sand-100: #f4f0e9;
+  --color-sand-200: #e9e3d8;
+  --color-sand-300: #d8cfbf;
+
+  /* Plaka şeridi (TR) */
+  --color-plate-blue: #1f4fbf;
+
+  --shadow-card: 0 1px 2px rgb(18 28 45 / 0.04), 0 4px 16px -6px rgb(18 28 45 / 0.08);
 }
 
 :root {
@@ -10,5 +47,19 @@
 }
 
 body {
-  @apply bg-gray-50 font-sans text-gray-900 antialiased;
+  @apply bg-sand-50 font-sans text-ink-900 antialiased;
+  /* Plus Jakarta Sans'ın boşluk karakteri dar (≈0,19 em); kelimeler birbirine yapışmasın. */
+  word-spacing: 0.08em;
+}
+
+/* Tailwind'in temel stilleri form öğelerinde yazı tipini devralır ama kelime aralığını devralmaz. */
+button,
+input,
+select,
+textarea {
+  word-spacing: inherit;
+}
+
+::selection {
+  @apply bg-gold-200 text-ink-950;
 }

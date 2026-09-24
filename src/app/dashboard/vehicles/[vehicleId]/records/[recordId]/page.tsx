@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Paperclip, Pencil, UserRound } from "lucide-react";
 import { AddDocuments } from "@/components/documents/add-documents";
 import { DocumentList } from "@/components/documents/document-list";
 import { RecordOdometerWarning } from "@/components/records/odometer-warning";
 import { RecordHistory } from "@/components/records/record-history";
+import { BackLink } from "@/components/ui/back-link";
 import { buttonClass } from "@/components/ui/button-styles";
+import { cardClass } from "@/components/ui/card";
 import { ConfirmActionButton } from "@/components/ui/confirm-action-button";
 import { FormAlert } from "@/components/ui/form-alert";
 import { requireUser } from "@/lib/auth";
@@ -46,23 +49,22 @@ export default async function RecordPage({
 
   return (
     <div className="mx-auto max-w-lg">
-      <Link href={`/dashboard/vehicles/${vehicle.id}`} className="text-sm text-gray-500">
-        ← {formatPlate(vehicle.plate)}
-      </Link>
+      <BackLink href={`/dashboard/vehicles/${vehicle.id}`}>{formatPlate(vehicle.plate)}</BackLink>
 
       {failedUploadCount > 0 && (
-        <div className="mt-3">
+        <div className="mt-4">
           <FormAlert tone="error">
             {`Kayıt oluşturuldu ancak ${failedUploadCount} dosya yüklenemedi. Aşağıdan tekrar ekleyebilirsin.`}
           </FormAlert>
         </div>
       )}
 
-      <article className="mt-3 rounded-xl border border-gray-200 bg-white p-4">
+      <article className={`${cardClass} mt-4 p-5 sm:p-6`}>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-xl font-semibold">{record.service_name}</h1>
-            <p className="mt-0.5 text-gray-600">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold-700">Servis kaydı</p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">{record.service_name}</h1>
+            <p className="mt-1 font-medium tabular-nums text-ink-600">
               {`${formatDate(record.service_date)} · ${formatKm(record.odometer_km)}`}
             </p>
           </div>
@@ -71,6 +73,7 @@ export default async function RecordPage({
               href={`/dashboard/vehicles/${vehicle.id}/records/${record.id}/edit`}
               className={`${buttonClass("secondary", "sm")} shrink-0`}
             >
+              <Pencil aria-hidden />
               Düzenle
             </Link>
           )}
@@ -82,15 +85,23 @@ export default async function RecordPage({
           </div>
         )}
 
-        <p className="mt-4 whitespace-pre-line break-words">{record.description}</p>
-        <p className="mt-4 text-sm text-gray-500">{enteredByLabel(record.entered_by)}</p>
+        <p className="mt-5 whitespace-pre-line break-words leading-relaxed text-ink-800">
+          {record.description}
+        </p>
+        <p className="mt-5 flex items-center gap-1.5 border-t border-sand-100 pt-4 text-sm text-ink-500">
+          <UserRound aria-hidden className="size-4" />
+          {enteredByLabel(record.entered_by)}
+        </p>
       </article>
 
-      <section className="mt-6">
-        <h2 className="text-base font-semibold">Belgeler</h2>
-        <div className="mt-3 flex flex-col gap-4">
+      <section className={`${cardClass} mt-5 p-5 sm:p-6`}>
+        <h2 className="flex items-center gap-2 text-base font-bold">
+          <Paperclip aria-hidden className="size-4 text-gold-600" />
+          Belgeler
+        </h2>
+        <div className="mt-4 flex flex-col gap-4">
           {documents.length === 0 ? (
-            <p className="text-sm text-gray-500">Bu kayda belge veya fotoğraf eklenmemiş.</p>
+            <p className="text-sm text-ink-500">Bu kayda belge veya fotoğraf eklenmemiş.</p>
           ) : (
             <DocumentList
               documents={documents}

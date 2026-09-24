@@ -67,11 +67,3 @@ export function summarizeTimeline(entries: TimelineEntry[]): TimelineSummary {
     odometerDropCount: entries.filter((entry) => entry.odometerDrop).length,
   };
 }
-
-// "2 belge", "1 fotoğraf"
-export function attachmentLabels(entry: Pick<TimelineEntry, "documentCount" | "photoCount">) {
-  const labels: string[] = [];
-  if (entry.documentCount > 0) labels.push(`${entry.documentCount} belge`);
-  if (entry.photoCount > 0) labels.push(`${entry.photoCount} fotoğraf`);
-  return labels;
-}

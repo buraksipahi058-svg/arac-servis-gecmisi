@@ -15,7 +15,7 @@ export function TextField({ label, name, hint, error, id, ...inputProps }: TextF
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={inputId} className="text-sm font-medium text-gray-800">
+      <label htmlFor={inputId} className="text-sm font-semibold text-ink-800">
         {label}
       </label>
       {/* text-base (16px): iOS'ta odaklanınca otomatik yakınlaştırmayı önler. */}
@@ -24,10 +24,10 @@ export function TextField({ label, name, hint, error, id, ...inputProps }: TextF
         name={name}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
-        className={`h-12 rounded-lg border bg-white px-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+        className={`h-12 rounded-xl border bg-white shadow-sm transition-colors px-3 text-base text-ink-900 placeholder:text-ink-300 focus:outline-none focus:ring-4 ${
           error
             ? "border-red-400 focus:border-red-500 focus:ring-red-500/15"
-            : "border-gray-300 focus:border-gray-900 focus:ring-gray-900/10"
+            : "border-sand-300 focus:border-ink-700 focus:ring-gold-400/30"
         }`}
         {...inputProps}
       />
@@ -37,7 +37,7 @@ export function TextField({ label, name, hint, error, id, ...inputProps }: TextF
         </p>
       )}
       {hint && (
-        <p id={hintId} className="text-xs text-gray-500">
+        <p id={hintId} className="text-xs text-ink-500">
           {hint}
         </p>
       )}

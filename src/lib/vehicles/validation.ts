@@ -1,10 +1,12 @@
 import { formatPlate, isValidPlate, normalizePlate } from "./plate";
+import { DEFAULT_VEHICLE_TYPE, isVehicleType, type VehicleType } from "./vehicle-types";
 
-export type VehicleField = "plate" | "make" | "model" | "modelYear";
+export type VehicleField = "vehicleType" | "plate" | "make" | "model" | "modelYear";
 export type VehicleFormValues = Record<VehicleField, string>;
 export type VehicleFieldErrors = Partial<Record<VehicleField, string>>;
 
 export type VehicleInput = {
+  vehicle_type: VehicleType;
   plate: string;
   make: string;
   model: string;
@@ -31,6 +33,8 @@ export function parseVehicleForm(formData: FormData): {
   data?: VehicleInput;
 } {
   const values: VehicleFormValues = {
+    // Alan hiç gönderilmezse (eski/JS'siz istemci) otomobil kabul edilir; geçersiz değer reddedilir.
+    vehicleType: readString(formData, "vehicleType") || DEFAULT_VEHICLE_TYPE,
     plate: readString(formData, "plate"),
     make: readString(formData, "make"),
     model: readString(formData, "model"),
@@ -38,6 +42,10 @@ export function parseVehicleForm(formData: FormData): {
   };
 
   const errors: VehicleFieldErrors = {};
+
+  if (!isVehicleType(values.vehicleType)) {
+    errors.vehicleType = "Araç tipini seç.";
+  }
 
   const plate = normalizePlate(values.plate);
   if (!plate) {
@@ -60,13 +68,19 @@ export function parseVehicleForm(formData: FormData): {
     errors.modelYear = `Model yılı ${MIN_MODEL_YEAR}–${maxModelYear} arasında olmalı.`;
   }
 
-  if (Object.keys(errors).length > 0) {
+  if (Object.keys(errors).length > 0 || !isVehicleType(values.vehicleType)) {
     return { values, errors };
   }
 
   return {
     values: { ...values, plate: formatPlate(plate) },
     errors,
-    data: { plate, make: values.make, model: values.model, model_year: modelYear },
+    data: {
+      vehicle_type: values.vehicleType,
+      plate,
+      make: values.make,
+      model: values.model,
+      model_year: modelYear,
+    },
   };
 }
