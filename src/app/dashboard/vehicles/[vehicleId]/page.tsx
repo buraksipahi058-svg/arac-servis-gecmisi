@@ -40,12 +40,20 @@ export default async function VehiclePage({
               {`${vehicle.make} ${vehicle.model} ${vehicle.model_year}`}
             </p>
           </div>
-          <Link
-            href={`/dashboard/vehicles/${vehicle.id}/edit`}
-            className={`${buttonClass("secondary", "sm")} shrink-0`}
-          >
-            Düzenle
-          </Link>
+          <div className="flex shrink-0 gap-2">
+            <Link
+              href={`/dashboard/vehicles/${vehicle.id}/share`}
+              className={buttonClass("secondary", "sm")}
+            >
+              Paylaş
+            </Link>
+            <Link
+              href={`/dashboard/vehicles/${vehicle.id}/edit`}
+              className={buttonClass("secondary", "sm")}
+            >
+              Düzenle
+            </Link>
+          </div>
         </div>
       </section>
 

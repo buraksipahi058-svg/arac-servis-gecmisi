@@ -16,12 +16,17 @@ export function VehicleCard({ vehicle }: { vehicle: VehicleOverview }) {
           ? "Henüz servis kaydı yok"
           : `${vehicle.recordCount} servis kaydı · son kayıt ${formatKm(vehicle.latestKm ?? 0)}`}
       </p>
-      <Link
-        href={`/dashboard/vehicles/${vehicle.id}`}
-        className={`${buttonClass("secondary", "sm")} mt-4 w-full`}
-      >
-        Geçmişi Gör
-      </Link>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Link href={`/dashboard/vehicles/${vehicle.id}`} className={buttonClass("secondary", "sm")}>
+          Geçmişi Gör
+        </Link>
+        <Link
+          href={`/dashboard/vehicles/${vehicle.id}/share`}
+          className={buttonClass("secondary", "sm")}
+        >
+          Paylaş
+        </Link>
+      </div>
     </article>
   );
 }
