@@ -3,7 +3,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(24);
+select plan(26);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'owner-a@test.local'),
@@ -43,6 +43,17 @@ select throws_ok(
      values ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Sahte', '2025-01-01', 1, 'x', 'service') $$,
   '42501', null,
   'A kaydı "servis tarafından girildi" olarak işaretleyemez'
+);
+select throws_ok(
+  $$ insert into public.service_records (vehicle_id, service_id, service_name, service_date, odometer_km, description)
+     values ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', gen_random_uuid(), 'X', '2025-01-01', 1, 'x') $$,
+  '42501', null,
+  'A kayda servis kimliği (service_id) atayamaz'
+);
+select throws_ok(
+  $$ update public.service_records set service_id = null where vehicle_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' $$,
+  '42501', null,
+  'A kaydın servis kimliğini (service_id) değiştiremez'
 );
 select throws_ok(
   $$ insert into public.service_records (vehicle_id, service_name, service_date, odometer_km, description)

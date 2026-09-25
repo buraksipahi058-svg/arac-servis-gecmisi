@@ -4,7 +4,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(23);
+select plan(26);
 
 -- ---------- Hazırlık (yetkili rol) ----------
 insert into auth.users (id, email) values
@@ -48,6 +48,19 @@ select lives_ok(
      '11111111-1111-1111-1111-111111111111/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/cccccccc-cccc-cccc-cccc-cccccccccccc/fis.webp',
      '{"mimetype": "image/webp", "size": 12345}') $$,
   'A kendi kaydının klasörüne dosya yükleyebilir'
+);
+-- Üzerine yazma yok: storage.objects için UPDATE politikası tanımlı değil.
+select is_empty(
+  $$ update storage.objects set metadata = '{"mimetype": "image/webp", "size": 1}'
+     where bucket_id = 'record-documents' and name = '11111111-1111-1111-1111-111111111111/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/cccccccc-cccc-cccc-cccc-cccccccccccc/fis.webp' returning 1 $$,
+  'A kendi dosyasının üzerine yazamaz (UPDATE hiçbir satırı etkilemez)'
+);
+select throws_ok(
+  $$ insert into storage.objects (bucket_id, name, metadata) values ('record-documents',
+     '11111111-1111-1111-1111-111111111111/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/cccccccc-cccc-cccc-cccc-cccccccccccc/fis.webp', '{"mimetype": "image/webp", "size": 1}')
+     on conflict (bucket_id, name) do update set metadata = excluded.metadata $$,
+  '42501', null,
+  'A kendi dosyasının üzerine upsert ile yazamaz'
 );
 select throws_ok(
   $$ insert into storage.objects (bucket_id, name) values ('record-documents',
@@ -193,6 +206,12 @@ select throws_ok(
   $$ select * from public.record_documents $$,
   '42501', null,
   'anonim kullanıcı belge tablosunu okuyamaz'
+);
+select throws_ok(
+  $$ insert into storage.objects (bucket_id, name) values ('record-documents',
+     '11111111-1111-1111-1111-111111111111/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/cccccccc-cccc-cccc-cccc-cccccccccccc/anon.webp') $$,
+  '42501', null,
+  'anonim kullanıcı dosya yükleyemez'
 );
 
 select * from finish();

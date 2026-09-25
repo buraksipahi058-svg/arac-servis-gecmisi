@@ -33,7 +33,7 @@ export function SignupForm() {
           <h2 className="text-lg font-bold">E-postanı kontrol et</h2>
           <p className="mt-1 text-sm leading-relaxed text-ink-600">
             <span className="font-semibold text-ink-900">{pendingEmail}</span>
-            {" adresine bir doğrulama bağlantısı gönderdik. Bağlantıya dokunduğunda hesabın açılır. "}
+            {" adresine bir doğrulama bağlantısı gönderdik. Bağlantının açtığı sayfada onayladığında hesabın açılır. "}
             Bağlantı 1 saat geçerlidir; e-postayı göremiyorsan spam klasörüne de bak.
           </p>
         </div>

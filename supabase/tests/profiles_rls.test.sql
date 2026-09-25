@@ -2,7 +2,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(22);
+select plan(23);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'usta-a@test.local'),
@@ -16,6 +16,11 @@ set local request.jwt.claims = '{"sub": "11111111-1111-1111-1111-111111111111", 
 select lives_ok(
   $$ insert into public.profiles (display_name, city, phone, bio) values ('Ahmet Usta', 'İstanbul', '+90 532 000 00 00', 'Motor ve şanzıman') $$,
   'kullanıcı kendi profilini oluşturabilir'
+);
+select throws_ok(
+  $$ delete from public.profiles where user_id = '11111111-1111-1111-1111-111111111111' $$,
+  '42501', null,
+  'kullanıcı profil satırını silemez (silme yetkisi yok)'
 );
 select throws_ok(
   $$ insert into public.profiles (user_id, display_name) values ('22222222-2222-2222-2222-222222222222', 'Sahte') $$,

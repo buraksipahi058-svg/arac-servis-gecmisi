@@ -3,8 +3,8 @@ import { headers } from "next/headers";
 
 // Hatalı denemeleri (giriş, paylaşım kodu) istemci başına sınırlayan basit, bellek içi sayaç.
 // Tek sunucu süreci içindir; süreç yeniden başlarsa sıfırlanır.
-// İstemci anahtarı x-forwarded-for başlığından gelir: önünde bu başlığı kendisi yazan güvenilir
-// bir ters vekil (reverse proxy) yoksa istemci tarafından değiştirilebilir.
+// İstemci anahtarı x-forwarded-for başlığından gelir (ayrıntı: getClientKey). Önünde ters vekil
+// (reverse proxy) yoksa bu başlık tümüyle istemcinin elindedir.
 
 const MAX_TRACKED_KEYS = 10_000;
 
@@ -45,10 +45,23 @@ export function createFailureLimiter(options: { windowMs: number; maxFailures: n
   };
 }
 
+// x-forwarded-for, "istemcinin yazdıkları..., vekillerin eklediği adresler" sırasıyla gelir. İlk girdiler
+// istemci tarafından uydurulabilir; güvenilir olan, bizim ters vekilimizin eklediği girdidir: sondan
+// TRUSTED_PROXY_HOPS'uncu (varsayılan 1 = önünde tek vekil: nginx, Caddy, Vercel). Örneğin Cloudflare + nginx
+// gibi iki katmanda 2 olmalıdır.
+function trustedProxyHops(): number {
+  const hops = Number(process.env.TRUSTED_PROXY_HOPS ?? "1");
+  return Number.isInteger(hops) && hops >= 1 ? hops : 1;
+}
+
 export async function getClientKey(): Promise<string> {
   const requestHeaders = await headers();
+  const forwarded = (requestHeaders.get("x-forwarded-for") ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
   return (
-    requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    forwarded[Math.max(0, forwarded.length - trustedProxyHops())] ||
     requestHeaders.get("x-real-ip") ||
     "unknown"
   );

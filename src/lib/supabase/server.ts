@@ -1,6 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
+import { isHttpsRequest } from "@/lib/request-origin";
 import type { Database } from "./database.types";
 import { getSupabasePublicEnv } from "./env";
 import { fetchWithTimeout } from "./fetch-with-timeout";
@@ -13,6 +14,8 @@ export async function createClient() {
 
   return createServerClient<Database>(url, publishableKey, {
     global: { fetch: fetchWithTimeout },
+    // HTTPS'te oturum çerezleri yalnızca şifreli bağlantıda gönderilir.
+    cookieOptions: { secure: await isHttpsRequest() },
     cookies: {
       getAll() {
         return cookieStore.getAll();

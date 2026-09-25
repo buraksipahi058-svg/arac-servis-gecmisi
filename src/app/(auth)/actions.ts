@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createFailureLimiter, getClientKey } from "@/lib/rate-limit";
+import { isConfirmationType } from "@/lib/email-confirmation";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/lib/safe-redirect";
 
@@ -147,6 +148,25 @@ export async function resendConfirmation(
     message: "Doğrulama e-postası yeniden gönderildi. Gelen kutunu ve spam klasörünü kontrol et.",
     email,
   };
+}
+
+// E-postadaki bağlantının açtığı sayfadaki buton (POST). Token bağlantı açılınca değil, kullanıcı onaylayınca
+// doğrulanır: e-posta güvenlik tarayıcılarının bağlantıyı önceden açması token'ı tüketmez; başka bir sitenin
+// kullanıcıyı bağlantıya yönlendirmesi de (server action Origin denetimi sayesinde) tek başına oturum açtırmaz.
+export async function confirmEmail(formData: FormData) {
+  const tokenHash = readString(formData, "token_hash");
+  const type = readString(formData, "type");
+
+  if (tokenHash && isConfirmationType(type)) {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    if (!error) {
+      revalidatePath("/", "layout");
+      const next = safeNextPath(formData.get("next"));
+      redirect(`${next}${next.includes("?") ? "&" : "?"}dogrulandi=1`);
+    }
+  }
+  redirect("/login?dogrulama=gecersiz");
 }
 
 export async function logout() {

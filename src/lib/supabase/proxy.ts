@@ -14,6 +14,8 @@ export async function updateSession(
 
   const supabase = createServerClient(url, publishableKey, {
     global: { fetch: fetchWithTimeout },
+    // HTTPS'te oturum çerezleri yalnızca şifreli bağlantıda gönderilir (Next, protokolü bu başlığa yazar).
+    cookieOptions: { secure: request.headers.get("x-forwarded-proto") === "https" },
     cookies: {
       getAll() {
         return request.cookies.getAll();

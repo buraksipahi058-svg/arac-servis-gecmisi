@@ -1,5 +1,6 @@
 import "server-only";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createHmac, timingSafeEqual } from "node:crypto";
+import { createAdminClient, getSecretKey } from "@/lib/supabase/admin";
 import { isValidPlate, normalizePlate } from "@/lib/vehicles/plate";
 import { hashShareCode, normalizeShareCode } from "./code";
 
@@ -41,14 +42,25 @@ export async function verifyShareAccess(
   return { vehicleId: data.vehicle_id, expiresAt: data.expires_at, plate, code };
 }
 
-// Paylaşım erişim çerezi: yalnızca /shared yolunda, httpOnly.
+// Paylaşım erişim çerezi: yalnızca /shared yolunda, httpOnly. Plaka ve kod, sunucunun gizli anahtarından
+// türetilen bir anahtarla imzalanır. Elle yazılmış (imzasız) bir çerez veritabanına sorulmadan reddedilir;
+// böylece çerez, formdaki deneme sınırını atlatıp kod denemek için kullanılamaz.
 export const SHARE_ACCESS_COOKIE = "shared_access";
 
+function signAccess(payload: string): Buffer {
+  const key = createHmac("sha256", getSecretKey()).update("share-access-cookie").digest();
+  return createHmac("sha256", key).update(payload).digest();
+}
+
 export function encodeAccessCookie(access: Pick<ShareAccess, "plate" | "code">): string {
-  return `${access.plate}:${access.code}`;
+  const payload = `${access.plate}:${access.code}`;
+  return `${payload}:${signAccess(payload).toString("base64url")}`;
 }
 
 export function decodeAccessCookie(value: string): { plate: string; code: string } | null {
-  const [plate, code, ...rest] = value.split(":");
-  return plate && code && rest.length === 0 ? { plate, code } : null;
+  const [plate, code, signature, ...rest] = value.split(":");
+  if (!plate || !code || !signature || rest.length > 0) return null;
+  const expected = signAccess(`${plate}:${code}`);
+  const given = Buffer.from(signature, "base64url");
+  return given.length === expected.length && timingSafeEqual(given, expected) ? { plate, code } : null;
 }

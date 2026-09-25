@@ -6,5 +6,8 @@ import { getSupabasePublicEnv } from "./env";
 // Yalnızca publishable key kullanır; erişim RLS ile sınırlanır.
 export function createClient() {
   const { url, publishableKey } = getSupabasePublicEnv();
-  return createBrowserClient<Database>(url, publishableKey);
+  return createBrowserClient<Database>(url, publishableKey, {
+    // Tarayıcı oturumu yenilerse çerezi sunucuyla aynı şekilde yazar: HTTPS'te Secure.
+    cookieOptions: { secure: typeof window !== "undefined" && window.location.protocol === "https:" },
+  });
 }

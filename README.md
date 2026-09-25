@@ -31,7 +31,7 @@ bir unvanı onayladığını gösterir ("doğrulanmış" ifadesi kullanılmaz).
 | --- | --- |
 | `/` | Giriş sayfası |
 | `/signup`, `/login` | Kayıt, giriş |
-| `/auth/confirm` | E-postadaki doğrulama bağlantısı (doğrulanınca oturum açılır, `/dashboard`'a yönlendirir) |
+| `/auth/confirm` | E-postadaki doğrulama bağlantısının açtığı onay sayfası (butona basınca hesap doğrulanır, oturum açılır) |
 | `/dashboard` | Benim Araçlarım |
 | `/dashboard/vehicles/[id]` | Araç ve servis geçmişi |
 | `/dashboard/vehicles/[id]/records/[recordId]` | Servis kaydı, belgeler, değişiklik geçmişi |
@@ -64,7 +64,8 @@ Host yeniden başlarsa Supabase container'ları kendiliğinden kalkar; `npm run 
 ## E-posta doğrulama
 
 - Kayıttan sonra oturum açılmaz; hesap, e-postadaki bağlantıyla (1 saat geçerli, tek kullanımlık) doğrulanınca
-  açılır. Kayıt ekranında ve doğrulanmamış hesapla giriş denendiğinde "tekrar gönder" seçeneği çıkar; aynı
+  açılır. Bağlantı bir onay sayfası açar, doğrulama oradaki butonla yapılır (e-posta tarayıcılarının bağlantıyı
+  önceden açması token'ı tüketmez). Kayıt ekranında ve doğrulanmamış hesapla giriş denendiğinde "tekrar gönder" seçeneği çıkar; aynı
   adrese en fazla dakikada bir e-posta gönderilir.
 - Geliştirmede e-postalar gerçek adreslere gitmez, Mailpit'te görünür: http://192.168.1.13:54324
 - Ayarlar `supabase/config.toml` içinde (`[auth.email]`), e-posta şablonu `supabase/templates/confirmation.html`.
