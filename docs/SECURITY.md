@@ -21,6 +21,17 @@
    yalnızca veren geri alır; unvan kaldırılınca onayları silinir.
    Not: Onaylar kullanıcı beyanıdır; sahte hesaplarla sayı şişirilebilir. Uygulama bunları "doğrulanmış"
    olarak sunmaz.
+6. **Kayıt ve e-posta doğrulama:** Hesap, e-postadaki tek kullanımlık bağlantıyla doğrulanmadan oturum açamaz
+   (`[auth.email] enable_confirmations`). Bağlantı `/auth/confirm` rotasına gelir: yalnızca `email`/`signup`
+   türleri kabul edilir, token sunucuda `verifyOtp` ile doğrulanır, yönlendirme `safeNextPath` ile yalnızca
+   `/dashboard` altına yapılır; geçersiz, süresi dolmuş veya kullanılmış bağlantılar aynı genel mesaja düşer.
+   Kayıtlı bir adresle kayıt denemesi, yeni kayıtla aynı "E-postanı kontrol et" yanıtını alır. Bunun için
+   GoTrue'da e-posta **ve** SMS otomatik onayı kapalı olmalıdır (`[auth.sms] enable_confirmations = true`);
+   biri açıksa GoTrue "User already registered" döner. Aynı adrese en fazla dakikada bir doğrulama e-postası
+   gönderilir.
+   Not: GoTrue API'sine doğrudan yapılan kayıt isteğinde, kayıtlı adres için dönen sahte kullanıcının
+   `identities` dizisi boştur; adresin kayıtlı olduğu API üzerinden yine anlaşılabilir (GoTrue kısıtı).
+   Arayüz bunu göstermez; GoTrue'nun kayıt/giriş hız sınırı (`sign_in_sign_ups`) geçerlidir.
 
 ## Otomatik kontroller
 
@@ -46,8 +57,11 @@
 - [ ] HTTPS ve önünde `X-Forwarded-For`/`X-Forwarded-Proto` başlıklarını kendisi yazan güvenilir bir ters vekil
       (reverse proxy). Deneme sınırları `X-Forwarded-For`'a dayanır; vekil yoksa bu başlık istemci tarafından
       değiştirilebilir. Paylaşım çerezi HTTPS isteklerinde `secure` olarak yazılır.
-- [ ] Supabase Auth: e-posta doğrulamasını aç (`enable_confirmations`), SMTP ayarla, `site_url` ve yönlendirme
-      adreslerini production alan adına göre güncelle; doğrulama bağlantısı için `/auth/confirm` rotası ekle.
+- [ ] Supabase Auth: gerçek SMTP sağlayıcısı (yerelde e-postalar Mailpit'e düşer) ve buna uygun `email_sent`
+      hız sınırı; `site_url` ve `additional_redirect_urls` production alan adıyla (doğrulama bağlantısı
+      `site_url` üzerinden kurulur); `supabase/templates/confirmation.html` şablonu ve konu satırı projeye
+      aktarılmalı; e-posta ve SMS otomatik onayı kapalı kalmalı (`MAILER_AUTOCONFIRM=false`,
+      `SMS_AUTOCONFIRM=false`).
 - [ ] Deneme sınırları bellek içi: birden fazla sunucu süreci varsa ortak bir depoya (ör. Postgres/Redis) taşı.
 - [ ] Yerel CLI'ın paylaşılan varsayılan anahtarları yerine production projesinin anahtarları;
       `SUPABASE_SECRET_KEY` yalnızca sunucu ortam değişkeni olarak.
@@ -58,5 +72,6 @@
 
 Supabase CLI yerel geliştirme içindir: tüm servisler `0.0.0.0`'a bağlanır. Veritabanı (54322) varsayılan
 `postgres/postgres` şifresiyle, Studio (54323) ve Mailpit (54324) şifresiz olarak yerel ağa açıktır.
+Mailpit'te doğrulama bağlantıları durduğundan, yerel ağdaki herkes bu bağlantılarla hesap doğrulayabilir.
 Yerel ağda güvenilmeyen cihaz varsa bu portlar yalnızca host ve geliştirici bilgisayarına açılmalıdır
 (Docker yayınlanan portlarda `ufw`'yi atladığı için kural `DOCKER-USER` zincirine yazılmalıdır).

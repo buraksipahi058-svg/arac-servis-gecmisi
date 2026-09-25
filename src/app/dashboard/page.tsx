@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Car, UserRound } from "lucide-react";
 import { buttonClass } from "@/components/ui/button-styles";
 import { cardClass, emptyStateClass } from "@/components/ui/card";
+import { FormAlert } from "@/components/ui/form-alert";
 import { requireUser } from "@/lib/auth";
 import { getProfile } from "@/lib/profiles/queries";
 import { VehicleCard } from "@/components/vehicles/vehicle-card";
@@ -10,12 +11,18 @@ import { listOwnVehicles } from "@/lib/vehicles/queries";
 
 export const metadata: Metadata = { title: "Benim Araçlarım" };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: PageProps<"/dashboard">) {
+  const { dogrulandi } = await searchParams;
   const { user } = await requireUser();
   const [vehicles, profile] = await Promise.all([listOwnVehicles(), getProfile(user.id)]);
 
   return (
     <>
+      {dogrulandi === "1" && (
+        <div className="mb-6">
+          <FormAlert tone="success">E-posta adresin doğrulandı. Hoş geldin!</FormAlert>
+        </div>
+      )}
       <div className="flex items-end justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold-700">Garaj</p>

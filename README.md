@@ -10,7 +10,8 @@ Next.js 16 (App Router, TypeScript strict, Tailwind) + Supabase (Auth, Postgres 
 
 ## Özellikler
 
-- Kayıt, giriş, çıkış (Supabase Auth, cookie tabanlı oturum)
+- Kayıt, giriş, çıkış (Supabase Auth, cookie tabanlı oturum); hesap e-postadaki bağlantıyla doğrulanınca açılır,
+  doğrulama e-postası tekrar istenebilir
 - Araç ekleme/düzenleme/silme; araç tipi (otomobil, motosiklet, otobüs, minibüs, kamyonet, kamyon, traktör)
   (servis kaydı olan araç silinemez)
 - Servis kaydı: tarih, km, servis, işlem açıklaması; düzenleme ve silme değişiklik geçmişine yazılır
@@ -30,6 +31,7 @@ bir unvanı onayladığını gösterir ("doğrulanmış" ifadesi kullanılmaz).
 | --- | --- |
 | `/` | Giriş sayfası |
 | `/signup`, `/login` | Kayıt, giriş |
+| `/auth/confirm` | E-postadaki doğrulama bağlantısı (doğrulanınca oturum açılır, `/dashboard`'a yönlendirir) |
 | `/dashboard` | Benim Araçlarım |
 | `/dashboard/vehicles/[id]` | Araç ve servis geçmişi |
 | `/dashboard/vehicles/[id]/records/[recordId]` | Servis kaydı, belgeler, değişiklik geçmişi |
@@ -57,6 +59,20 @@ npm run dev                 # http://192.168.1.13:3001
 | Mailpit (test e-postaları) | http://192.168.1.13:54324 |
 
 Host yeniden başlarsa Supabase container'ları kendiliğinden kalkar; `npm run dev` yeniden çalıştırılmalıdır.
+`supabase/config.toml` değişiklikleri `npx supabase stop && npx supabase start` ile uygulanır (veriler korunur).
+
+## E-posta doğrulama
+
+- Kayıttan sonra oturum açılmaz; hesap, e-postadaki bağlantıyla (1 saat geçerli, tek kullanımlık) doğrulanınca
+  açılır. Kayıt ekranında ve doğrulanmamış hesapla giriş denendiğinde "tekrar gönder" seçeneği çıkar; aynı
+  adrese en fazla dakikada bir e-posta gönderilir.
+- Geliştirmede e-postalar gerçek adreslere gitmez, Mailpit'te görünür: http://192.168.1.13:54324
+- Ayarlar `supabase/config.toml` içinde (`[auth.email]`), e-posta şablonu `supabase/templates/confirmation.html`.
+  Şablondaki bağlantı `site_url` üzerinden kurulur.
+- Production için: gerçek bir SMTP sağlayıcısı, production alan adıyla `site_url` / `additional_redirect_urls`,
+  şablonun Supabase projesine aktarılması (ayrıntılar: [docs/SECURITY.md](docs/SECURITY.md)).
+- Telefon doğrulaması ileride eklenebilir; bunun için bir SMS sağlayıcısı (ör. Twilio) ve `[auth.sms]` ayarları
+  gerekir. Telefonla kayıt şu an kapalıdır.
 
 ## Kontroller
 

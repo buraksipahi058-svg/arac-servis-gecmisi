@@ -10,6 +10,15 @@ export type AuthFormState = {
   error?: string;
   message?: string;
   email?: string;
+  // Hesap var ama e-posta doğrulanmamış: "tekrar gönder" seçeneği gösterilir.
+  needsConfirmation?: boolean;
+};
+
+export type ResendState = {
+  error?: string;
+  message?: string;
+  // Sonucun hangi adres için olduğu (JS olmadan gönderimde formu yeniden çizmek için de kullanılır).
+  email?: string;
 };
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -28,7 +37,7 @@ function authErrorMessage(code: string | undefined): string {
     case "invalid_credentials":
       return "E-posta veya şifre hatalı.";
     case "email_not_confirmed":
-      return "E-posta adresin henüz doğrulanmamış. Gelen kutunu kontrol et.";
+      return "E-posta adresin henüz doğrulanmamış. Sana gönderdiğimiz bağlantıyla doğruladıktan sonra giriş yapabilirsin.";
     case "user_already_exists":
     case "email_exists":
       return "Bu e-posta adresiyle zaten bir hesap var.";
@@ -68,7 +77,11 @@ export async function login(
 
   if (error) {
     if (error.code === "invalid_credentials") loginLimiter.recordFailure(limiterKey);
-    return { error: authErrorMessage(error.code), email };
+    return {
+      error: authErrorMessage(error.code),
+      email,
+      needsConfirmation: error.code === "email_not_confirmed",
+    };
   }
 
   revalidatePath("/", "layout");
@@ -100,17 +113,40 @@ export async function signup(
     return { error: authErrorMessage(error.code), email };
   }
 
-  // E-posta doğrulaması açıksa oturum hemen oluşmaz.
+  // E-posta doğrulaması açık: oturum doğrulama bağlantısına tıklanınca açılır.
+  // Adres zaten kayıtlıysa da aynı yanıt verilir (hangi adreslerin kayıtlı olduğu sızdırılmaz).
   if (!data.session) {
     return {
-      message:
-        "Hesabın oluşturuldu. E-posta adresine gönderilen bağlantıyla doğruladıktan sonra giriş yapabilirsin.",
+      message: "Doğrulama bağlantısını e-posta adresine gönderdik.",
       email,
     };
   }
 
   revalidatePath("/", "layout");
   redirect("/dashboard");
+}
+
+// Doğrulama e-postasını yeniden gönderir. Auth sunucusu aynı adrese 60 saniyede bir gönderime izin verir.
+export async function resendConfirmation(
+  _prevState: ResendState,
+  formData: FormData,
+): Promise<ResendState> {
+  const email = readString(formData, "email").trim();
+  if (!EMAIL_PATTERN.test(email)) return { error: "Geçerli bir e-posta adresi gir." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({ type: "signup", email });
+
+  if (error) {
+    if (error.code === "over_email_send_rate_limit" || error.code === "over_request_rate_limit") {
+      return { error: "Yeni bir e-posta için biraz bekle (en az 1 dakika) ve tekrar dene.", email };
+    }
+    return { error: authErrorMessage(error.code), email };
+  }
+  return {
+    message: "Doğrulama e-postası yeniden gönderildi. Gelen kutunu ve spam klasörünü kontrol et.",
+    email,
+  };
 }
 
 export async function logout() {
